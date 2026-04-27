@@ -1,0 +1,76 @@
+.guesser-map-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.guesser-map-instance {
+  flex: 1;
+  width: 100%;
+}
+
+.feedback-panel {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  z-index: 10;
+}
+
+.feedback {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.temperature-badge {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.feedback-text {
+  flex: 1;
+}
+
+.distance {
+  margin: 0;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.direction {
+  margin: 5px 0 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.guess-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  z-index: 10;
+}
+
+.guess-controls button {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+}

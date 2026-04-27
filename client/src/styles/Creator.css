@@ -1,0 +1,117 @@
+.creator-container {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.creator-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.creator-photo-section h1 {
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+.creator-photo-section p {
+  margin-bottom: 30px;
+  color: #6b7280;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #059669;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+}
+
+.btn-ghost:hover {
+  background-color: #eff6ff;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.camera-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.camera-view video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.capture-btn {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  background-color: white;
+  color: #3b82f6;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+}
+
+.creator-map-section {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.error {
+  color: #dc2626;
+  margin-top: 15px;
+  text-align: center;
+}
