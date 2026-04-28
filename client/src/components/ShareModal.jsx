@@ -17,7 +17,7 @@ function ShareModal({ gameData }) {
     const element = document.querySelector('canvas');
     const link = document.createElement('a');
     link.href = element.toDataURL('image/png');
-    link.download = `photoguessr-${gameData.gameId}.png`;
+    link.download = `whereabouts-${gameData.gameId}.png`;
     link.click();
   };
 

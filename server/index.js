@@ -34,5 +34,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🎮 PhotoGuessr server running on http://localhost:${PORT}`);
+  console.log(`📍 Whereabouts server running on http://localhost:${PORT}`);
 });

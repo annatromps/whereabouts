@@ -8,7 +8,7 @@ function Home() {
   return (
     <div className="home-container">
       <div className="home-content">
-        <h1 className="title">🎮 PhotoGuessr</h1>
+        <h1 className="title">📍 Whereabouts</h1>
         <p className="subtitle">Upload a photo, mark the location, and challenge others to guess where it was taken!</p>
 
         <div className="button-group">

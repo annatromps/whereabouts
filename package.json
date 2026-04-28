@@ -1,5 +1,5 @@
 {
-  "name": "photoguessr",
+  "name": "whereabouts",
   "version": "1.0.0",
   "description": "A web app where creators upload photos and guessers pinpoint locations",
   "type": "module",
