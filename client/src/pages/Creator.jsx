@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
-import ThemedLoader from '../components/ThemedLoader';
-import { dbg, clearDbg } from '../utils/debugLog';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
@@ -26,15 +24,7 @@ function resizeImage(source, maxDim = 1200) {
       canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
 
       canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            dbg(`Resized ${w}×${h} → ${tw}×${th}, ${(blob.size / 1024).toFixed(0)} KB`);
-            resolve(blob);
-          } else {
-            dbg('canvas.toBlob returned null — using original', 'warn');
-            resolve(source);
-          }
-        },
+        (blob) => resolve(blob ?? source),
         'image/jpeg',
         0.85
       );
@@ -42,7 +32,6 @@ function resizeImage(source, maxDim = 1200) {
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      dbg('resizeImage: img load failed — using original', 'warn');
       resolve(source);
     };
 
@@ -74,26 +63,20 @@ function Creator() {
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
-    if (!file) {
-      dbg('onChange fired but files[0] is empty — ignoring', 'warn');
-      return;
-    }
+    if (!file) return;
 
     const sizeMB = file.size / 1024 / 1024;
-    dbg(`File: "${file.name}" type=${file.type} size=${sizeMB.toFixed(2)} MB`);
 
-    try { e.target.value = ''; }
-    catch (err) { dbg(`Input reset failed: ${err.message}`, 'warn'); }
+    try { e.target.value = ''; } catch { /* ignore reset errors */ }
 
     // Revoke any previous preview URL
     if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
 
-    // ── Instant preview — URL.createObjectURL never fails regardless of size ──
+    // Instant preview — URL.createObjectURL never fails regardless of file size
     const previewUrl = URL.createObjectURL(file);
     previewUrlRef.current = previewUrl;
     originalFileRef.current = file;
 
-    dbg('Preview URL created — advancing to map immediately');
     setPhoto(previewUrl);
     setError('');
     setSizeWarning(sizeMB > 8 ? `Large file (${sizeMB.toFixed(1)} MB) — will compress before uploading` : '');
@@ -141,7 +124,6 @@ function Creator() {
     }
     setLoading(true);
     setError('');
-    dbg('Confirm clicked — resizing…');
 
     try {
       const blob = await resizeImage(originalFileRef.current, 1200);
@@ -152,7 +134,6 @@ function Creator() {
       formData.append('lat', coordinates.lat);
       formData.append('lng', coordinates.lng);
 
-      dbg(`Uploading ${(blob.size / 1024).toFixed(0)} KB…`);
       const response = await fetch('/api/games', { method: 'POST', body: formData });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -160,8 +141,6 @@ function Creator() {
       }
 
       const data = await response.json();
-      dbg(`Game created: ${data.gameId}`);
-      clearDbg();
 
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
@@ -174,7 +153,6 @@ function Creator() {
       });
       setStep('share');
     } catch (err) {
-      dbg(`Upload failed: ${err.message}`, 'error');
       setError('Failed to create game: ' + err.message);
     } finally {
       setLoading(false);
