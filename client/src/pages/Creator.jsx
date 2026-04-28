@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import exifr from 'exifr';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Creator.css';
 
 function Creator() {
+  const { user, openAuth } = useAuth();
   const [step, setStep] = useState('photo');
   const [photo, setPhoto] = useState(null);
   const [detectedCoordinates, setDetectedCoordinates] = useState(null);
@@ -125,6 +127,28 @@ function Creator() {
       setLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="creator-container">
+        <div className="creator-photo-section card">
+          <h1>📸 Create a Game</h1>
+          <p>You need to be logged in to create a game.</p>
+          <div className="button-group">
+            <button onClick={() => openAuth('login')} className="btn btn-primary">
+              Log in
+            </button>
+            <button onClick={() => openAuth('register')} className="btn btn-ghost">
+              Register
+            </button>
+            <button onClick={() => navigate('/')} className="btn btn-ghost" style={{ borderColor: 'transparent', color: '#6b7280' }}>
+              ← Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="creator-container">

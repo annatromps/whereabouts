@@ -1,6 +1,6 @@
 .share-modal-container {
   width: 100%;
-  min-height: 100dvh;
+  min-height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: center;

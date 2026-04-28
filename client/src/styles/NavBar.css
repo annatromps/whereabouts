@@ -1,0 +1,73 @@
+.navbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 20px;
+  background: white;
+  border-bottom: 1px solid #f0e8e8;
+  box-shadow: 0 1px 4px rgba(228, 73, 71, 0.08);
+  z-index: 100;
+}
+
+.navbar-brand {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #E44947;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.navbar-brand:hover {
+  color: #cc3b39;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-username {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navbar-btn {
+  padding: 7px 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 6px;
+  min-height: 34px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.navbar-btn-ghost {
+  background: transparent;
+  color: #E44947;
+  border: 1.5px solid #E44947;
+}
+
+.navbar-btn-ghost:hover {
+  background: #fff5f5;
+}
+
+.navbar-btn-primary {
+  background: #E44947;
+  color: white;
+}
+
+.navbar-btn-primary:hover {
+  background: #cc3b39;
+}

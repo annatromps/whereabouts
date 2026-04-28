@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { initDb } from './db.js';
 import gamesRouter from './routes/games.js';
+import authRouter from './routes/auth.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(UPLOAD_DIR));
 await initDb();
 
 // Routes
+app.use('/api/auth', authRouter);
 app.use('/api/games', gamesRouter);
 
 // Serve React app for all other routes
