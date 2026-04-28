@@ -111,6 +111,24 @@
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
+}
+
+.size-warning {
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* MapPicker must fill remaining height when a warning banner is present */
+.creator-map-section .map-picker-container {
+  flex: 1;
+  min-height: 0;
+  height: auto;
 }
 
 .error {

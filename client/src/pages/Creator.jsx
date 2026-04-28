@@ -1,274 +1,203 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import exifr from 'exifr';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
 import ThemedLoader from '../components/ThemedLoader';
+import { dbg, clearDbg } from '../utils/debugLog';
 import '../styles/Creator.css';
+
+// Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
+// Returns a Blob. Falls back to the original if anything goes wrong.
+function resizeImage(source, maxDim = 1200) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(source);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const { naturalWidth: w, naturalHeight: h } = img;
+      const scale = Math.min(1, maxDim / Math.max(w, h));
+      const tw = Math.round(w * scale);
+      const th = Math.round(h * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = tw;
+      canvas.height = th;
+      canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            dbg(`Resized ${w}×${h} → ${tw}×${th}, ${(blob.size / 1024).toFixed(0)} KB`);
+            resolve(blob);
+          } else {
+            dbg('canvas.toBlob returned null — using original', 'warn');
+            resolve(source);
+          }
+        },
+        'image/jpeg',
+        0.85
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      dbg('resizeImage: img load failed — using original', 'warn');
+      resolve(source);
+    };
+
+    img.src = url;
+  });
+}
 
 function Creator() {
   const [step, setStep] = useState('photo');
-  const [photo, setPhoto] = useState(null);
-  const [detectedCoordinates, setDetectedCoordinates] = useState(null);
-  const [processingPhoto, setProcessingPhoto] = useState(false);
+  const [photo, setPhoto] = useState(null);   // object URL — instant, never crashes
   const [loading, setLoading] = useState(false);
   const [gameData, setGameData] = useState(null);
   const [error, setError] = useState('');
-  const [logs, setLogs] = useState([]);
+  const [sizeWarning, setSizeWarning] = useState('');
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const logsEndRef = useRef(null);
+  const originalFileRef = useRef(null);  // File/Blob kept for upload
+  const previewUrlRef = useRef(null);    // tracked so we can revoke on unmount
   const navigate = useNavigate();
 
-  // Stable log helper — also mirrors to console
-  const dbg = useCallback((msg, level = 'ok') => {
-    const t = new Date().toTimeString().slice(0, 8);
-    const entry = { t, msg, level, id: `${Date.now()}-${Math.random()}` };
-    if (level === 'error') console.error('[Creator]', msg);
-    else if (level === 'warn') console.warn('[Creator]', msg);
-    else console.log('[Creator]', msg);
-    setLogs(prev => [...prev, entry]);
-  }, []);
-
-  // Keep a stable ref so the global handlers can call dbg without stale closures
-  const dbgRef = useRef(dbg);
-  useEffect(() => { dbgRef.current = dbg; }, [dbg]);
-
-  // Catch unhandled promise rejections (blank-screen culprit candidate)
+  // Revoke the object URL when the component unmounts to free memory
   useEffect(() => {
-    const onReject = (e) => {
-      dbgRef.current(`UNHANDLED REJECTION: ${e.reason?.message ?? String(e.reason)}`, 'error');
-    };
-    const onError = (e) => {
-      dbgRef.current(`UNCAUGHT ERROR: ${e.message} (${e.filename}:${e.lineno})`, 'error');
-    };
-    window.addEventListener('unhandledrejection', onReject);
-    window.addEventListener('error', onError);
     return () => {
-      window.removeEventListener('unhandledrejection', onReject);
-      window.removeEventListener('error', onError);
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
     };
   }, []);
 
-  // Auto-scroll log panel to bottom
-  useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]);
-
-  const handleFileSelect = async (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) {
       dbg('onChange fired but files[0] is empty — ignoring', 'warn');
       return;
     }
 
-    dbg(`File selected: "${file.name}" type=${file.type} size=${(file.size / 1024).toFixed(1)} KB`);
+    const sizeMB = file.size / 1024 / 1024;
+    dbg(`File: "${file.name}" type=${file.type} size=${sizeMB.toFixed(2)} MB`);
 
-    // Reset input so the same file can be re-selected if needed
-    try { e.target.value = ''; dbg('File input reset OK'); }
-    catch (resetErr) { dbg(`File input reset failed: ${resetErr.message}`, 'warn'); }
+    try { e.target.value = ''; }
+    catch (err) { dbg(`Input reset failed: ${err.message}`, 'warn'); }
 
-    setProcessingPhoto(true);
+    // Revoke any previous preview URL
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+
+    // ── Instant preview — URL.createObjectURL never fails regardless of size ──
+    const previewUrl = URL.createObjectURL(file);
+    previewUrlRef.current = previewUrl;
+    originalFileRef.current = file;
+
+    dbg('Preview URL created — advancing to map immediately');
+    setPhoto(previewUrl);
     setError('');
+    setSizeWarning(sizeMB > 8 ? `Large file (${sizeMB.toFixed(1)} MB) — will compress before uploading` : '');
 
-    try {
-      // ── Step 1: FileReader ────────────────────────────────────────────────
-      dbg('Starting FileReader.readAsDataURL…');
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onloadstart = () => dbg('FileReader: loadstart');
-        reader.onprogress = (ev) => {
-          if (ev.lengthComputable)
-            dbg(`FileReader: progress ${Math.round((ev.loaded / ev.total) * 100)}%`);
-        };
-        reader.onload = (ev) => {
-          const len = ev.target.result?.length ?? 0;
-          dbg(`FileReader: onload — dataUrl length ${len}`);
-          resolve(ev.target.result);
-        };
-        reader.onerror = (ev) => {
-          const msg = reader.error?.message ?? 'unknown FileReader error';
-          dbg(`FileReader: onerror — ${msg}`, 'error');
-          reject(new Error(msg));
-        };
-        reader.onabort = () => {
-          dbg('FileReader: onabort', 'error');
-          reject(new Error('File read was aborted'));
-        };
-
-        reader.readAsDataURL(file);
-      });
-
-      dbg(`File read complete (${(dataUrl.length / 1024).toFixed(1)} KB as base64)`);
-
-      // ── Step 2: Set photo state ───────────────────────────────────────────
-      dbg('Calling setPhoto()…');
-      setPhoto(dataUrl);
-      dbg('setPhoto() called — photo state queued');
-
-      // ── Step 3: EXIF GPS (optional, 3s timeout) ───────────────────────────
-      dbg('Starting EXIF extraction (3 s timeout)…');
-      let gps = null;
-      try {
-        gps = await Promise.race([
-          exifr.gps(file).catch((err) => {
-            dbg(`EXIF rejected: ${err?.message}`, 'warn');
-            return null;
-          }),
-          new Promise((resolve) =>
-            setTimeout(() => {
-              dbg('EXIF timed out after 3 s — continuing without GPS', 'warn');
-              resolve(null);
-            }, 3000)
-          ),
-        ]);
-        dbg(gps ? `EXIF GPS: lat=${gps.latitude} lng=${gps.longitude}` : 'EXIF: no GPS data');
-      } catch (exifErr) {
-        dbg(`EXIF threw: ${exifErr?.message}`, 'warn');
-        gps = null;
-      }
-
-      setDetectedCoordinates(gps ? { lat: gps.latitude, lng: gps.longitude } : null);
-
-      // ── Step 4: Advance to map ────────────────────────────────────────────
-      dbg('Calling setStep("map")…');
-      setStep('map');
-      dbg('✅ Done — should now show map');
-
-    } catch (err) {
-      dbg(`handleFileSelect FAILED: ${err.message}`, 'error');
-      setError(`Failed to load photo: ${err.message}`);
-    } finally {
-      setProcessingPhoto(false);
-      dbg('processingPhoto set to false');
-    }
+    // Navigate to map straight away — no processing delay
+    setStep('map');
   };
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
       videoRef.current.srcObject = stream;
       document.querySelector('.creator-photo-section').style.display = 'none';
       document.querySelector('.camera-view').style.display = 'block';
-    } catch (err) {
+    } catch {
       setError('Camera access denied');
     }
   };
 
   const capturePhoto = () => {
     const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
     const video = videoRef.current;
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0);
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    video.srcObject.getTracks().forEach(t => t.stop());
 
-    const imageData = canvas.toDataURL('image/jpeg');
-    setPhoto(imageData);
-
-    const stream = video.srcObject;
-    stream.getTracks().forEach(track => track.stop());
-
-    document.querySelector('.creator-photo-section').style.display = 'block';
-    document.querySelector('.camera-view').style.display = 'none';
-    setStep('map');
+    canvas.toBlob((blob) => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      const url = URL.createObjectURL(blob);
+      previewUrlRef.current = url;
+      originalFileRef.current = blob;
+      setPhoto(url);
+      setSizeWarning('');
+      document.querySelector('.creator-photo-section').style.display = 'block';
+      document.querySelector('.camera-view').style.display = 'none';
+      setStep('map');
+    }, 'image/jpeg');
   };
 
   const handleMapConfirm = async (coordinates) => {
+    if (!originalFileRef.current) {
+      setError('No photo to upload — please go back and select one');
+      return;
+    }
     setLoading(true);
     setError('');
+    dbg('Confirm clicked — resizing…');
+
     try {
-      const blob = await new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas');
-        const img = new Image();
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          canvas.getContext('2d').drawImage(img, 0, 0);
-          canvas.toBlob(
-            b => (b ? resolve(b) : reject(new Error('Image conversion failed'))),
-            'image/jpeg',
-            0.9
-          );
-        };
-        img.onerror = () => reject(new Error('Failed to process image'));
-        img.src = photo;
-      });
+      const blob = await resizeImage(originalFileRef.current, 1200);
+      setSizeWarning('');
 
       const formData = new FormData();
-      formData.append('photo', blob);
+      formData.append('photo', blob, 'photo.jpg');
       formData.append('lat', coordinates.lat);
       formData.append('lng', coordinates.lng);
 
+      dbg(`Uploading ${(blob.size / 1024).toFixed(0)} KB…`);
       const response = await fetch('/api/games', { method: 'POST', body: formData });
-      if (!response.ok) throw new Error('Failed to create game');
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || `Server error (${response.status})`);
+      }
 
       const data = await response.json();
+      dbg(`Game created: ${data.gameId}`);
+      clearDbg();
+
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+
       setGameData({
         ...data,
-        shareUrl: `${window.location.origin}/game/${data.gameId}`
+        shareUrl: `${window.location.origin}/game/${data.gameId}`,
       });
       setStep('share');
     } catch (err) {
+      dbg(`Upload failed: ${err.message}`, 'error');
       setError('Failed to create game: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Debug log panel ─────────────────────────────────────────────────────
-  const DebugPanel = logs.length > 0 && (
-    <div className="debug-panel">
-      <div className="debug-panel-header">
-        <span>📋 Upload debug log</span>
-        <button className="debug-clear-btn" onClick={() => setLogs([])}>Clear</button>
-      </div>
-      <div className="debug-entries">
-        {logs.map((entry) => (
-          <div key={entry.id} className={`debug-entry debug-${entry.level}`}>
-            <span className="debug-time">{entry.t}</span>
-            <span className="debug-msg">{entry.msg}</span>
-          </div>
-        ))}
-        <div ref={logsEndRef} />
-      </div>
-    </div>
-  );
-
   return (
     <div className="creator-container">
       {step === 'photo' && (
         <div className="creator-photo-section card">
           <h1>📸 Create a Game</h1>
-
-          {processingPhoto ? (
-            <ThemedLoader variant="pin" message="Processing photo…" />
-          ) : (
-            <>
-              <p>Choose how you want to add a photo:</p>
-              <div className="button-group">
-                <button
-                  onClick={() => fileInputRef.current.click()}
-                  className="btn btn-primary"
-                >
-                  📤 Upload from Device
-                </button>
-                <button onClick={startCamera} className="btn btn-secondary">
-                  📷 Take a Photo
-                </button>
-                <button onClick={() => navigate('/')} className="btn btn-ghost">
-                  ← Back
-                </button>
-              </div>
-            </>
-          )}
-
+          <p>Choose how you want to add a photo:</p>
+          <div className="button-group">
+            <button onClick={() => fileInputRef.current.click()} className="btn btn-primary">
+              📤 Upload from Device
+            </button>
+            <button onClick={startCamera} className="btn btn-secondary">
+              📷 Take a Photo
+            </button>
+            <button onClick={() => navigate('/')} className="btn btn-ghost">
+              ← Back
+            </button>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -276,16 +205,13 @@ function Creator() {
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
-
           {error && <p className="error">{error}</p>}
-
-          {DebugPanel}
         </div>
       )}
 
       <div className="camera-view" style={{ display: 'none' }}>
-        <video ref={videoRef} autoPlay playsInline></video>
-        <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+        <video ref={videoRef} autoPlay playsInline />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
         <button onClick={capturePhoto} className="btn btn-primary capture-btn">
           📸 Capture
         </button>
@@ -293,12 +219,13 @@ function Creator() {
 
       {step === 'map' && photo && (
         <div className="creator-map-section">
+          {sizeWarning && <div className="size-warning">{sizeWarning}</div>}
           <MapPicker
             photo={photo}
-            detectedCoordinates={detectedCoordinates}
+            detectedCoordinates={null}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setDetectedCoordinates(null); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); }}
           />
         </div>
       )}
