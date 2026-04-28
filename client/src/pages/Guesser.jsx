@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import GuesserMap from '../components/GuesserMap';
 import ResultScreen from '../components/ResultScreen';
+import Lightbox from '../components/Lightbox';
 import '../styles/Guesser.css';
 
 function Guesser() {
@@ -13,6 +14,7 @@ function Guesser() {
   const [markerPos, setMarkerPos] = useState(null);
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -80,10 +82,15 @@ function Guesser() {
 
   return (
     <div className="guesser-container">
-      <div className="guesser-photo">
+      <div className="guesser-photo" onClick={() => setLightboxOpen(true)}>
         {photo && <img src={photo} alt="Guess this location" />}
         <div className="guess-counter">Guess #{guesses.length + 1}</div>
+        <div className="photo-zoom-hint">🔍 Tap to zoom</div>
       </div>
+
+      {lightboxOpen && (
+        <Lightbox src={photo} alt="Location photo" onClose={() => setLightboxOpen(false)} />
+      )}
 
       {lastFeedback && (
         <div

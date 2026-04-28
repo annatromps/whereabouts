@@ -1,11 +1,12 @@
 .home-container {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #FFCCD6;
-  padding: 40px 20px;
+  padding: clamp(16px, 3.5dvh, 36px) 20px;
+  overflow: auto;
 }
 
 .home-content {
@@ -20,7 +21,7 @@
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   font-size: clamp(1.8rem, 8vw, 3.5rem);
-  margin-bottom: 12px;
+  margin-bottom: clamp(4px, 1dvh, 10px);
   text-align: left;
   letter-spacing: -0.02em;
   color: #E44947;
@@ -29,27 +30,28 @@
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  margin-bottom: 36px;
+  font-size: clamp(0.875rem, 2dvh, 1rem);
+  margin-bottom: clamp(12px, 2.5dvh, 24px);
   color: #4b5563;
-  line-height: 1.6;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .button-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 48px;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: clamp(16px, 3dvh, 32px);
 }
 
 .btn-primary {
-  padding: 15px 40px;
-  font-size: 1.1rem;
+  padding: 13px 36px;
+  font-size: 1rem;
   background-color: #E44947;
   color: white;
   font-weight: 600;
-  box-shadow: 0 10px 30px rgba(228, 73, 71, 0.35);
+  box-shadow: 0 6px 20px rgba(228, 73, 71, 0.32);
 }
 
 .btn-primary:hover {
@@ -64,13 +66,13 @@
 }
 
 .how-it-works-label {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #9ca3af;
-  margin-bottom: 16px;
-  text-align: center;
+  margin-bottom: clamp(6px, 1dvh, 12px);
+  text-align: left;
 }
 
 /* Mobile: vertical stacked list */
@@ -83,9 +85,9 @@
 .feature {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px 0;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(8px, 1.5dvh, 14px) 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
@@ -95,51 +97,52 @@
 
 .feature-left {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   flex-shrink: 0;
-  width: 52px;
 }
 
 .feature-icon {
-  width: 48px;
-  height: 48px;
-  font-size: 1.5rem;
+  width: 38px;
+  height: 38px;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(228, 73, 71, 0.1);
-  border-radius: 14px;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .step-number {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #9ca3af;
+  color: #d1d5db;
+  flex-shrink: 0;
 }
 
 .feature-right {
   flex: 1;
-  padding-top: 3px;
+  min-width: 0;
 }
 
 .feature h3 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   color: #1f2937;
 }
 
 .feature p {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #6b7280;
-  line-height: 1.6;
+  line-height: 1.4;
   margin: 0;
 }
 
-/* Desktop: restore 3-column cards */
+/* Desktop: 3-column cards */
 
 @media (min-width: 640px) {
   .home-content {
@@ -148,10 +151,26 @@
 
   .title {
     font-size: clamp(3rem, 6vw, 3.8rem);
+    margin-bottom: 10px;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 28px;
+    text-align: left;
+  }
+
+  .button-group {
+    margin-bottom: 36px;
   }
 
   .how-it-works {
     text-align: center;
+  }
+
+  .how-it-works-label {
+    text-align: center;
+    margin-bottom: 14px;
   }
 
   .features {
@@ -162,14 +181,14 @@
 
   .feature {
     flex-direction: column;
+    align-items: flex-start;
     gap: 0;
-    padding: 28px 24px;
+    padding: 24px 20px;
     background: white;
     border: 1px solid rgba(228, 73, 71, 0.15);
     border-radius: 20px;
     border-bottom: none;
     position: relative;
-    text-align: left;
     box-shadow: 0 2px 12px rgba(228, 73, 71, 0.08);
   }
 
@@ -188,22 +207,24 @@
   .feature-left {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
     width: 100%;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .feature-icon {
     width: 44px;
     height: 44px;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    border-radius: 12px;
   }
 
-  .step-number {
-    font-size: 0.7rem;
+  .feature h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
   }
 
-  .feature-right {
-    padding-top: 0;
+  .feature p {
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 }

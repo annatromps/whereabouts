@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Pink rounded-square background -->
+  <rect width="512" height="512" rx="96" fill="#FFCCD6"/>
+
+  <!-- Globe grid (subtle, very low opacity) -->
+  <circle cx="256" cy="272" r="172" fill="none" stroke="#E44947" stroke-width="9" opacity="0.13"/>
+  <ellipse cx="256" cy="272" rx="172" ry="62" fill="none" stroke="#E44947" stroke-width="7" opacity="0.10"/>
+  <ellipse cx="256" cy="200" rx="138" ry="44" fill="none" stroke="#E44947" stroke-width="6" opacity="0.08"/>
+  <ellipse cx="256" cy="344" rx="138" ry="44" fill="none" stroke="#E44947" stroke-width="6" opacity="0.08"/>
+  <ellipse cx="256" cy="272" rx="62" ry="172" fill="none" stroke="#E44947" stroke-width="7" opacity="0.10"/>
+
+  <!-- Bold W — 5-point polyline, thick rounded stroke -->
+  <polyline
+    points="68,90 154,296 256,194 358,296 444,90"
+    fill="none"
+    stroke="#E44947"
+    stroke-width="68"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

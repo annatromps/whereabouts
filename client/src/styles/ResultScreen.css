@@ -32,29 +32,54 @@
 .result-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .stat {
   background-color: #f9fafb;
-  padding: 20px;
+  padding: 16px 12px;
   border-radius: 8px;
   text-align: center;
+}
+
+.stat--label {
+  grid-column: 1 / -1;
+  background: rgba(228, 73, 71, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
 }
 
 .stat .label {
   display: block;
   color: #6b7280;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
 }
 
 .stat .value {
   display: block;
   color: #1f2937;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
+}
+
+.score-value {
+  color: #E44947 !important;
+}
+
+.score-max {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.score-label-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #E44947;
 }
 
 .result-map {
