@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import ThemedLoader from './ThemedLoader';
 import '../styles/MapPicker.css';
 
 function FlyTo({ target }) {
@@ -150,7 +151,7 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
                 onFocus={() => searchResults.length > 0 && setShowResults(true)}
                 onBlur={() => setTimeout(() => setShowResults(false), 150)}
               />
-              {searchLoading && <span className="map-search-spinner">⏳</span>}
+              {searchLoading && <span className="tl-search-spin" aria-label="Searching" />}
             </div>
             {showResults && searchResults.length > 0 && (
               <ul className="map-search-results">
@@ -196,14 +197,14 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
             className="btn btn-secondary"
             disabled={loading || geoLoading}
           >
-            {geoLoading ? '⏳ Locating...' : '📍 Use my location'}
+            {geoLoading ? <><ThemedLoader variant="dots" />Locating…</> : '📍 Use my location'}
           </button>
           <button
             onClick={() => coordinates && onConfirm(coordinates)}
             className="btn btn-primary"
             disabled={!coordinates || loading}
           >
-            {loading ? '⏳ Creating...' : '✓ Confirm Location'}
+            {loading ? <><ThemedLoader variant="dots" />Creating…</> : '✓ Confirm Location'}
           </button>
         </div>
         {geoError && <p className="geo-error">{geoError}</p>}

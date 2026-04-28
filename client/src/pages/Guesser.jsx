@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import GuesserMap from '../components/GuesserMap';
 import ResultScreen from '../components/ResultScreen';
 import Lightbox from '../components/Lightbox';
+import ThemedLoader from '../components/ThemedLoader';
 import '../styles/Guesser.css';
 
 function Guesser() {
@@ -15,22 +16,41 @@ function Guesser() {
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     const fetchGame = async () => {
+      setError('');
+      setGameState('loading');
       try {
-        const response = await fetch(`/api/games/${gameId}`);
-        if (!response.ok) throw new Error('Game not found');
+        const response = await fetch(`/api/games/${gameId}`, { signal: controller.signal });
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.error || `Server error (${response.status})`);
+        }
         const data = await response.json();
+        if (!data.photoUrl) throw new Error('Game data missing photo URL');
         setPhoto(data.photoUrl);
         setGameState('guessing');
       } catch (err) {
-        setError('Failed to load game: ' + err.message);
+        if (err.name === 'AbortError') {
+          setError('Game took too long to load — the server may be starting up. Please retry.');
+        } else {
+          setError('Failed to load game: ' + err.message);
+        }
+        setGameState('error');
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
+
     fetchGame();
-  }, [gameId]);
+    return () => { clearTimeout(timeoutId); controller.abort(); };
+  }, [gameId, retryCount]);
 
   const handleSubmitGuess = async () => {
     if (!markerPos || guessing) return;
@@ -53,20 +73,30 @@ function Guesser() {
     }
   };
 
-  if (gameState === 'loading') {
-    return <div className="container"><p>Loading game...</p></div>;
-  }
-
-  if (error) {
+  if (gameState === 'error') {
     return (
       <div className="container">
         <div className="error-card card">
-          <h2>Error</h2>
+          <h2>Couldn't load game</h2>
           <p>{error}</p>
-          <button onClick={() => navigate('/')}>← Go Home</button>
+          <div className="error-actions">
+            <button
+              className="btn btn-primary"
+              onClick={() => setRetryCount(n => n + 1)}
+            >
+              ↩ Retry
+            </button>
+            <button className="btn btn-ghost" onClick={() => navigate('/')}>
+              ← Go Home
+            </button>
+          </div>
         </div>
       </div>
     );
+  }
+
+  if (gameState === 'loading') {
+    return <ThemedLoader variant="fullscreen" />;
   }
 
   if (gameState === 'won') {
@@ -117,7 +147,7 @@ function Guesser() {
           className="btn btn-primary"
           disabled={!markerPos || guessing}
         >
-          {guessing ? '⏳ Submitting...' : '🎯 Guess this location'}
+          {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Guess this location'}
         </button>
       </div>
     </div>

@@ -127,3 +127,10 @@
   color: #6b7280;
   margin-bottom: 20px;
 }
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import ThemedLoader from './ThemedLoader';
 import '../styles/AuthModal.css';
 
 function AuthModal() {
@@ -133,7 +134,7 @@ function AuthModal() {
           {error && <p className="auth-error">{error}</p>}
 
           <button type="submit" className="auth-submit" disabled={loading}>
-            {loading ? 'Please wait…' : tab === 'login' ? 'Log in' : 'Create account'}
+            {loading ? <><ThemedLoader variant="dots" />Please wait…</> : tab === 'login' ? 'Log in' : 'Create account'}
           </button>
         </form>
 

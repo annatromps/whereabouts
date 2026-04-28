@@ -1,0 +1,122 @@
+/* ── Shared keyframes ── */
+
+@keyframes tl-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes tl-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tl-bounce {
+  0%, 100% { transform: translateY(0); }
+  40%       { transform: translateY(-18px); }
+  60%       { transform: translateY(-10px); }
+}
+
+@keyframes tl-shadow-pulse {
+  0%, 100% { transform: scaleX(1);   opacity: 0.5; }
+  40%       { transform: scaleX(0.45); opacity: 0.15; }
+  60%       { transform: scaleX(0.65); opacity: 0.3; }
+}
+
+@keyframes tl-dot-pulse {
+  0%, 80%, 100% { transform: scale(0.65); opacity: 0.4; }
+  40%           { transform: scale(1);    opacity: 1; }
+}
+
+/* ── Fullscreen globe loader ── */
+
+.tl-fullscreen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #FFCCD6;
+  gap: 20px;
+  z-index: 100;
+}
+
+.tl-globe {
+  font-size: 4rem;
+  display: inline-block;
+  animation: tl-spin 3s linear infinite;
+  filter: drop-shadow(0 4px 12px rgba(228, 73, 71, 0.3));
+}
+
+.tl-globe-message {
+  font-size: 1.05rem;
+  color: #E44947;
+  font-weight: 600;
+  margin: 0;
+  animation: tl-fadein 0.35s ease both;
+  letter-spacing: 0.01em;
+}
+
+/* ── Bouncing pin loader ── */
+
+.tl-pin-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 24px 0;
+}
+
+.tl-pin {
+  font-size: 2.5rem;
+  display: inline-block;
+  animation: tl-bounce 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 8px 6px rgba(228, 73, 71, 0.2));
+}
+
+.tl-pin-shadow {
+  width: 22px;
+  height: 7px;
+  background: rgba(228, 73, 71, 0.25);
+  border-radius: 50%;
+  animation: tl-shadow-pulse 0.9s ease-in-out infinite;
+  margin-bottom: 8px;
+}
+
+.tl-pin-msg {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ── Inline pulsing dots ── */
+
+.tl-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.tl-dots span {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: tl-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.tl-dots span:nth-child(2) { animation-delay: 0.2s; }
+.tl-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ── Tiny search spinner (CSS ring, no emoji) ── */
+
+.tl-search-spin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid #FFCCD6;
+  border-top-color: #E44947;
+  border-radius: 50%;
+  animation: tl-spin 0.65s linear infinite;
+  flex-shrink: 0;
+}

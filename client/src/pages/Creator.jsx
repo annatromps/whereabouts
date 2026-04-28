@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import exifr from 'exifr';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
+import ThemedLoader from '../components/ThemedLoader';
 import '../styles/Creator.css';
 
 function Creator() {
@@ -247,10 +248,7 @@ function Creator() {
           <h1>📸 Create a Game</h1>
 
           {processingPhoto ? (
-            <div className="photo-processing">
-              <div className="photo-spinner" />
-              <p>Processing photo…</p>
-            </div>
+            <ThemedLoader variant="pin" message="Processing photo…" />
           ) : (
             <>
               <p>Choose how you want to add a photo:</p>

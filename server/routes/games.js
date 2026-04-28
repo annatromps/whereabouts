@@ -86,12 +86,16 @@ router.get('/:gameId', (req, res) => {
     const db = getDb();
 
     db.get('SELECT photo_path FROM games WHERE id = ?', [gameId], (err, row) => {
-      if (err || !row) {
-        return res.status(404).json({ error: 'Game not found' });
+      if (err) {
+        console.error('DB error fetching game:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      if (!row) {
+        return res.status(404).json({ error: 'Game not found — it may have expired or the link is invalid' });
       }
 
       const photoUrl = `/uploads/${row.photo_path}`;
-      res.json({ photoUrl });
+      res.json({ gameId, photoUrl });
     });
   } catch (error) {
     console.error(error);
