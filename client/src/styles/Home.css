@@ -13,17 +13,19 @@
   max-width: 480px;
   width: 100%;
   color: #1f2937;
+  overflow: hidden;
 }
 
 .title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.5rem, 9vw, 3rem);
+  font-size: clamp(1.8rem, 8vw, 3.5rem);
   margin-bottom: 12px;
   text-align: left;
   letter-spacing: -0.02em;
   color: #E44947;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .subtitle {
@@ -145,7 +147,7 @@
   }
 
   .title {
-    font-size: 3.8rem;
+    font-size: clamp(3rem, 6vw, 3.8rem);
   }
 
   .how-it-works {
