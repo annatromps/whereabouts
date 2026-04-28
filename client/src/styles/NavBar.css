@@ -1,5 +1,6 @@
 .navbar {
   flex-shrink: 0;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -8,7 +9,7 @@
   background: white;
   border-bottom: 1px solid #f0e8e8;
   box-shadow: 0 1px 4px rgba(228, 73, 71, 0.08);
-  z-index: 100;
+  z-index: 200;
 }
 
 .navbar-brand {
@@ -25,49 +26,101 @@
   color: #cc3b39;
 }
 
-.navbar-actions {
+/* ── Burger button ── */
+
+.navbar-burger {
+  background: transparent;
+  border: none;
+  color: #E44947;
+  padding: 8px;
+  min-height: unset;
+  cursor: pointer;
+  border-radius: 6px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.navbar-username {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #374151;
-  white-space: nowrap;
-  max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.navbar-btn {
-  padding: 7px 14px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border-radius: 6px;
-  min-height: 34px;
-  white-space: nowrap;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-}
-
-.navbar-btn-ghost {
-  background: transparent;
-  color: #E44947;
-  border: 1.5px solid #E44947;
-}
-
-.navbar-btn-ghost:hover {
+.navbar-burger:hover {
   background: #fff5f5;
+  color: #E44947;
 }
 
-.navbar-btn-primary {
-  background: #E44947;
-  color: white;
+/* ── Dropdown menu ── */
+
+.nav-menu {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 264px;
+  background: white;
+  border-top: 2px solid #FFCCD6;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  padding: 6px 0 10px;
+  animation: navMenuIn 0.17s ease-out;
+  z-index: 300;
 }
 
-.navbar-btn-primary:hover {
-  background: #cc3b39;
+@keyframes navMenuIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.nav-menu-tagline {
+  padding: 12px 18px 8px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.nav-menu-header {
+  padding: 14px 18px 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.nav-menu-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 4px 0;
+}
+
+.nav-menu-item {
+  display: block;
+  width: 100%;
+  padding: 11px 18px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+  cursor: pointer;
+  min-height: unset;
+  transition: background 0.1s, color 0.1s;
+}
+
+.nav-menu-item:hover {
+  background: #fff5f5;
+  color: #E44947;
+}
+
+.nav-menu-item--accent {
+  color: #E44947;
+  font-weight: 600;
+}
+
+.nav-menu-item--muted {
+  color: #9ca3af;
+}
+
+.nav-menu-item--muted:hover {
+  background: #f9fafb;
+  color: #6b7280;
 }
