@@ -6,10 +6,12 @@ import '../styles/Guesser.css';
 
 function Guesser() {
   const { gameId } = useParams();
-  const [gameState, setGameState] = useState('loading'); // 'loading', 'guessing', 'won'
+  const [gameState, setGameState] = useState('loading');
   const [photo, setPhoto] = useState(null);
   const [guesses, setGuesses] = useState([]);
   const [lastFeedback, setLastFeedback] = useState(null);
+  const [markerPos, setMarkerPos] = useState(null);
+  const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -25,29 +27,27 @@ function Guesser() {
         setError('Failed to load game: ' + err.message);
       }
     };
-
     fetchGame();
   }, [gameId]);
 
-  const handleGuess = async (coordinates) => {
+  const handleSubmitGuess = async () => {
+    if (!markerPos || guessing) return;
+    setGuessing(true);
     try {
       const response = await fetch(`/api/games/${gameId}/guess`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(coordinates)
+        body: JSON.stringify({ lat: markerPos[0], lng: markerPos[1] })
       });
-
       if (!response.ok) throw new Error('Failed to submit guess');
       const feedback = await response.json();
-
-      setGuesses([...guesses, { coordinates, feedback }]);
+      setGuesses(prev => [...prev, { coordinates: { lat: markerPos[0], lng: markerPos[1] }, feedback }]);
       setLastFeedback(feedback);
-
-      if (feedback.correct) {
-        setGameState('won');
-      }
+      if (feedback.correct) setGameState('won');
     } catch (err) {
       setError('Failed to submit guess: ' + err.message);
+    } finally {
+      setGuessing(false);
     }
   };
 
@@ -81,12 +81,23 @@ function Guesser() {
     <div className="guesser-container">
       <div className="guesser-photo">
         {photo && <img src={photo} alt="Guess this location" />}
-        <div className="guess-counter">
-          Guess #{guesses.length + 1}
-        </div>
+        <div className="guess-counter">Guess #{guesses.length + 1}</div>
       </div>
       <div className="guesser-map">
-        <GuesserMap onGuess={handleGuess} lastFeedback={lastFeedback} />
+        <GuesserMap
+          markerPos={markerPos}
+          onMarkerChange={setMarkerPos}
+          lastFeedback={lastFeedback}
+        />
+      </div>
+      <div className="guesser-footer">
+        <button
+          onClick={handleSubmitGuess}
+          className="btn btn-primary"
+          disabled={!markerPos || guessing}
+        >
+          {guessing ? '⏳ Submitting...' : '🎯 Guess this location'}
+        </button>
       </div>
     </div>
   );
