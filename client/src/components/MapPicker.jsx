@@ -1,11 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { MapContainer, TileLayer, useMapEvent, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import '../styles/MapPicker.css';
+
+function FlyTo({ target }) {
+  const map = useMap();
+  if (target) map.setView(target, 10);
+  return null;
+}
 
 function MapPicker({ photo, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState([20, 0]);
+  const [flyTarget, setFlyTarget] = useState(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState('');
   const mapRef = useRef(null);
 
   const customIcon = L.icon({
@@ -19,9 +28,32 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
     useMapEvent('click', (e) => {
       setMarkerPos([e.latlng.lat, e.latlng.lng]);
       setCoordinates({ lat: e.latlng.lat, lng: e.latlng.lng });
+      setFlyTarget(null);
     });
     return null;
   }
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoError('Geolocation is not supported by your browser');
+      return;
+    }
+    setGeoLoading(true);
+    setGeoError('');
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setMarkerPos([latitude, longitude]);
+        setCoordinates({ lat: latitude, lng: longitude });
+        setFlyTarget([latitude, longitude]);
+        setGeoLoading(false);
+      },
+      () => {
+        setGeoError('Unable to retrieve your location');
+        setGeoLoading(false);
+      }
+    );
+  };
 
   return (
     <div className="map-picker-container">
@@ -35,6 +67,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
             attribution='&copy; OpenStreetMap contributors'
           />
           <MapClickHandler />
+          <FlyTo target={flyTarget} />
           {coordinates && (
             <Marker position={markerPos} icon={customIcon}>
               <Popup>
@@ -52,6 +85,13 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
             ← Back
           </button>
           <button
+            onClick={handleUseMyLocation}
+            className="btn btn-secondary"
+            disabled={loading || geoLoading}
+          >
+            {geoLoading ? '⏳ Locating...' : '📍 Use my current location'}
+          </button>
+          <button
             onClick={() => coordinates && onConfirm(coordinates)}
             className="btn btn-primary"
             disabled={!coordinates || loading}
@@ -59,6 +99,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
             {loading ? '⏳ Creating...' : '✓ Confirm Location'}
           </button>
         </div>
+        {geoError && <p className="geo-error">{geoError}</p>}
       </div>
     </div>
   );

@@ -46,3 +46,10 @@
   flex: 1;
   padding: 12px 20px;
 }
+
+.geo-error {
+  padding: 8px 20px 12px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  text-align: center;
+}
