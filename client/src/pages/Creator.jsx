@@ -6,9 +6,10 @@ import ShareModal from '../components/ShareModal';
 import '../styles/Creator.css';
 
 function Creator() {
-  const [step, setStep] = useState('photo'); // 'photo', 'map', 'share'
+  const [step, setStep] = useState('photo');
   const [photo, setPhoto] = useState(null);
   const [detectedCoordinates, setDetectedCoordinates] = useState(null);
+  const [processingPhoto, setProcessingPhoto] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gameData, setGameData] = useState(null);
   const [error, setError] = useState('');
@@ -21,19 +22,32 @@ function Creator() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Run EXIF extraction and file reading in parallel
-    const [gps, dataUrl] = await Promise.all([
-      exifr.gps(file).catch(() => null),
-      new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = ev => resolve(ev.target.result);
-        reader.readAsDataURL(file);
-      })
-    ]);
+    setProcessingPhoto(true);
+    setError('');
 
-    setDetectedCoordinates(gps ? { lat: gps.latitude, lng: gps.longitude } : null);
-    setPhoto(dataUrl);
-    setStep('map');
+    try {
+      const [gps, dataUrl] = await Promise.all([
+        // EXIF extraction — always fail silently
+        exifr.gps(file).catch(() => null),
+        // FileReader — must handle onerror or the promise hangs forever
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve(ev.target.result);
+          reader.onerror = () => reject(new Error('Could not read the selected photo'));
+          reader.readAsDataURL(file);
+        }),
+      ]);
+
+      setDetectedCoordinates(gps ? { lat: gps.latitude, lng: gps.longitude } : null);
+      setPhoto(dataUrl);
+      setStep('map');
+    } catch (err) {
+      setError('Failed to load photo — please try a different image.');
+    } finally {
+      setProcessingPhoto(false);
+      // Reset so the same file can be re-selected if needed
+      e.target.value = '';
+    }
   };
 
   const startCamera = async () => {
@@ -61,9 +75,8 @@ function Creator() {
     const imageData = canvas.toDataURL('image/jpeg');
     setPhoto(imageData);
 
-    // Stop camera
     const stream = video.srcObject;
-    stream.getTracks().forEach((track) => track.stop());
+    stream.getTracks().forEach(track => track.stop());
 
     document.querySelector('.creator-photo-section').style.display = 'block';
     document.querySelector('.camera-view').style.display = 'none';
@@ -72,35 +85,40 @@ function Creator() {
 
   const handleMapConfirm = async (coordinates) => {
     setLoading(true);
+    setError('');
     try {
-      const canvas = document.createElement('canvas');
-      const img = new Image();
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(async (blob) => {
-          const formData = new FormData();
-          formData.append('photo', blob);
-          formData.append('lat', coordinates.lat);
-          formData.append('lng', coordinates.lng);
+      // Promisify image → canvas → blob so setLoading(false) waits for the whole chain
+      const blob = await new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const img = new Image();
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          canvas.getContext('2d').drawImage(img, 0, 0);
+          canvas.toBlob(
+            b => (b ? resolve(b) : reject(new Error('Image conversion failed'))),
+            'image/jpeg',
+            0.9
+          );
+        };
+        img.onerror = () => reject(new Error('Failed to process image'));
+        img.src = photo;
+      });
 
-          const response = await fetch('/api/games', {
-            method: 'POST',
-            body: formData
-          });
+      const formData = new FormData();
+      formData.append('photo', blob);
+      formData.append('lat', coordinates.lat);
+      formData.append('lng', coordinates.lng);
 
-          if (!response.ok) throw new Error('Failed to create game');
-          const data = await response.json();
-          setGameData({
-            ...data,
-            shareUrl: `${window.location.origin}/game/${data.gameId}`
-          });
-          setStep('share');
-        });
-      };
-      img.src = photo;
+      const response = await fetch('/api/games', { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Failed to create game');
+
+      const data = await response.json();
+      setGameData({
+        ...data,
+        shareUrl: `${window.location.origin}/game/${data.gameId}`
+      });
+      setStep('share');
     } catch (err) {
       setError('Failed to create game: ' + err.message);
     } finally {
@@ -113,18 +131,32 @@ function Creator() {
       {step === 'photo' && (
         <div className="creator-photo-section card">
           <h1>📸 Create a Game</h1>
-          <p>Choose how you want to add a photo:</p>
-          <div className="button-group">
-            <button onClick={() => fileInputRef.current.click()} className="btn btn-primary">
-              📤 Upload from Device
-            </button>
-            <button onClick={startCamera} className="btn btn-secondary">
-              📷 Take a Photo
-            </button>
-            <button onClick={() => navigate('/')} className="btn btn-ghost">
-              ← Back
-            </button>
-          </div>
+
+          {processingPhoto ? (
+            <div className="photo-processing">
+              <div className="photo-spinner" />
+              <p>Processing photo…</p>
+            </div>
+          ) : (
+            <>
+              <p>Choose how you want to add a photo:</p>
+              <div className="button-group">
+                <button
+                  onClick={() => fileInputRef.current.click()}
+                  className="btn btn-primary"
+                >
+                  📤 Upload from Device
+                </button>
+                <button onClick={startCamera} className="btn btn-secondary">
+                  📷 Take a Photo
+                </button>
+                <button onClick={() => navigate('/')} className="btn btn-ghost">
+                  ← Back
+                </button>
+              </div>
+            </>
+          )}
+
           <input
             ref={fileInputRef}
             type="file"
