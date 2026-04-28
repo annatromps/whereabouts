@@ -1,20 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import '../styles/MapPicker.css';
 
 function FlyTo({ target }) {
   const map = useMap();
-  if (target) map.setView(target, 10);
+  useEffect(() => {
+    if (target) map.flyTo(target, Math.max(map.getZoom(), 12));
+  }, [target]);
+  return null;
+}
+
+function MapClickHandler({ onMapClick }) {
+  useMapEvent('click', (e) => {
+    onMapClick([e.latlng.lat, e.latlng.lng]);
+  });
   return null;
 }
 
 function MapPicker({ photo, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
-  const [markerPos, setMarkerPos] = useState([20, 0]);
+  const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+
   const mapRef = useRef(null);
 
   const customIcon = L.icon({
@@ -24,14 +39,52 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
     popupAnchor: [0, -41]
   });
 
-  function MapClickHandler() {
-    useMapEvent('click', (e) => {
-      setMarkerPos([e.latlng.lat, e.latlng.lng]);
-      setCoordinates({ lat: e.latlng.lat, lng: e.latlng.lng });
-      setFlyTarget(null);
-    });
-    return null;
-  }
+  // Debounced Nominatim search
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1`
+        );
+        const data = await res.json();
+        setSearchResults(data);
+        setShowResults(true);
+      } catch {
+        // silent — search is best-effort
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const placePin = (pos) => {
+    setMarkerPos(pos);
+    setCoordinates({ lat: pos[0], lng: pos[1] });
+  };
+
+  const handleMapClick = (pos) => {
+    placePin(pos);
+    setFlyTarget(null);
+  };
+
+  const handleSelectResult = (result) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    const pos = [lat, lng];
+    placePin(pos);
+    setFlyTarget(pos);
+    setSearchQuery('');
+    setShowResults(false);
+    setSearchResults([]);
+  };
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
@@ -41,11 +94,10 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
     setGeoLoading(true);
     setGeoError('');
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setMarkerPos([latitude, longitude]);
-        setCoordinates({ lat: latitude, lng: longitude });
-        setFlyTarget([latitude, longitude]);
+      ({ coords }) => {
+        const pos = [coords.latitude, coords.longitude];
+        placePin(pos);
+        setFlyTarget(pos);
         setGeoLoading(false);
       },
       () => {
@@ -58,27 +110,61 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
   return (
     <div className="map-picker-container">
       <div className="map-picker-content">
-        <h2>Mark the Location</h2>
-        <p>Click on the map to place a marker at the correct location</p>
+        <div className="map-picker-header">
+          <h2>Mark the Location</h2>
+          <p>Search for a place, or tap the map to drop a pin</p>
+        </div>
 
-        <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
-          />
-          <MapClickHandler />
-          <FlyTo target={flyTarget} />
-          {coordinates && (
-            <Marker position={markerPos} icon={customIcon}>
-              <Popup>
-                <div>
-                  <p>Lat: {markerPos[0].toFixed(4)}</p>
-                  <p>Lng: {markerPos[1].toFixed(4)}</p>
-                </div>
-              </Popup>
-            </Marker>
-          )}
-        </MapContainer>
+        <div className="map-picker-map-area">
+          {/* Search overlay — floats above the Leaflet map */}
+          <div className="map-search">
+            <div className="map-search-input-wrapper">
+              <span className="map-search-icon">🔍</span>
+              <input
+                type="text"
+                className="map-search-input"
+                placeholder="Search address, postcode, city or country…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                onBlur={() => setTimeout(() => setShowResults(false), 150)}
+              />
+              {searchLoading && <span className="map-search-spinner">⏳</span>}
+            </div>
+            {showResults && searchResults.length > 0 && (
+              <ul className="map-search-results">
+                {searchResults.map((result) => (
+                  <li
+                    key={result.place_id}
+                    className="map-search-result"
+                    onMouseDown={() => handleSelectResult(result)}
+                  >
+                    {result.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
+            />
+            <MapClickHandler onMapClick={handleMapClick} />
+            <FlyTo target={flyTarget} />
+            {markerPos && (
+              <Marker position={markerPos} icon={customIcon}>
+                <Popup>
+                  <div>
+                    <p>Lat: {markerPos[0].toFixed(4)}</p>
+                    <p>Lng: {markerPos[1].toFixed(4)}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+          </MapContainer>
+        </div>
 
         <div className="map-picker-controls">
           <button onClick={onBack} className="btn btn-ghost" disabled={loading}>
@@ -89,7 +175,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
             className="btn btn-secondary"
             disabled={loading || geoLoading}
           >
-            {geoLoading ? '⏳ Locating...' : '📍 Use my current location'}
+            {geoLoading ? '⏳ Locating...' : '📍 Use my location'}
           </button>
           <button
             onClick={() => coordinates && onConfirm(coordinates)}

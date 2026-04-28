@@ -18,29 +18,126 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
-.map-picker-content h2 {
-  padding: 20px 20px 10px;
-  color: #1f2937;
+/* ── Header ── */
+
+.map-picker-header {
+  padding: 16px 20px 12px;
+  flex-shrink: 0;
 }
 
-.map-picker-content p {
-  padding: 0 20px 20px;
+.map-picker-header h2 {
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.map-picker-header p {
   color: #6b7280;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+}
+
+/* ── Map area (wraps the Leaflet map + search overlay) ── */
+
+.map-picker-map-area {
+  flex: 1;
+  position: relative;
+  min-height: 0;
 }
 
 .map-picker-map {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   cursor: crosshair;
 }
+
+/* ── Search overlay ── */
+
+.map-search {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.map-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  padding: 0 12px;
+}
+
+.map-search-icon {
+  font-size: 0.9rem;
+  opacity: 0.5;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.map-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+  font-size: 0.9rem;
+  color: #1f2937;
+  background: transparent;
+  min-width: 0;
+}
+
+.map-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.map-search-spinner {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.map-search-results {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.map-search-result {
+  padding: 11px 16px;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+
+.map-search-result:last-child {
+  border-bottom: none;
+}
+
+.map-search-result:hover,
+.map-search-result:active {
+  background: #f0f4ff;
+}
+
+/* ── Bottom controls ── */
 
 .map-picker-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 16px;
+  padding: 12px 16px;
   background-color: #f9fafb;
   border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 .map-picker-controls button {
@@ -64,8 +161,9 @@
 }
 
 .geo-error {
-  padding: 8px 20px 12px;
+  padding: 6px 20px 10px;
   color: #dc2626;
   font-size: 0.85rem;
   text-align: center;
+  flex-shrink: 0;
 }
