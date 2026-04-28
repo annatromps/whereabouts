@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import exifr from 'exifr';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
 import '../styles/Creator.css';
@@ -7,6 +8,7 @@ import '../styles/Creator.css';
 function Creator() {
   const [step, setStep] = useState('photo'); // 'photo', 'map', 'share'
   const [photo, setPhoto] = useState(null);
+  const [detectedCoordinates, setDetectedCoordinates] = useState(null);
   const [loading, setLoading] = useState(false);
   const [gameData, setGameData] = useState(null);
   const [error, setError] = useState('');
@@ -15,16 +17,23 @@ function Creator() {
   const canvasRef = useRef(null);
   const navigate = useNavigate();
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setPhoto(event.target.result);
-        setStep('map');
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    // Run EXIF extraction and file reading in parallel
+    const [gps, dataUrl] = await Promise.all([
+      exifr.gps(file).catch(() => null),
+      new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = ev => resolve(ev.target.result);
+        reader.readAsDataURL(file);
+      })
+    ]);
+
+    setDetectedCoordinates(gps ? { lat: gps.latitude, lng: gps.longitude } : null);
+    setPhoto(dataUrl);
+    setStep('map');
   };
 
   const startCamera = async () => {
@@ -139,9 +148,10 @@ function Creator() {
         <div className="creator-map-section">
           <MapPicker
             photo={photo}
+            detectedCoordinates={detectedCoordinates}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => setStep('photo')}
+            onBack={() => { setStep('photo'); setDetectedCoordinates(null); }}
           />
         </div>
       )}

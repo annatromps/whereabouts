@@ -35,6 +35,21 @@
   font-size: 0.9rem;
 }
 
+/* ── EXIF detection banner ── */
+
+.location-detected-banner {
+  margin: 0 16px 10px;
+  padding: 10px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #1e40af;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
 /* ── Map area (wraps the Leaflet map + search overlay) ── */
 
 .map-picker-map-area {

@@ -18,10 +18,11 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ photo, onConfirm, loading, onBack }) {
+function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
+  const [locationFromPhoto, setLocationFromPhoto] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
 
@@ -65,6 +66,17 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Auto-place pin from EXIF GPS if the uploaded photo had coordinates
+  useEffect(() => {
+    if (detectedCoordinates) {
+      const pos = [detectedCoordinates.lat, detectedCoordinates.lng];
+      setMarkerPos(pos);
+      setCoordinates({ lat: pos[0], lng: pos[1] });
+      setFlyTarget(pos);
+      setLocationFromPhoto(true);
+    }
+  }, [detectedCoordinates]);
+
   const placePin = (pos) => {
     setMarkerPos(pos);
     setCoordinates({ lat: pos[0], lng: pos[1] });
@@ -73,6 +85,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
   const handleMapClick = (pos) => {
     placePin(pos);
     setFlyTarget(null);
+    setLocationFromPhoto(false);
   };
 
   const handleSelectResult = (result) => {
@@ -81,6 +94,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
     const pos = [lat, lng];
     placePin(pos);
     setFlyTarget(pos);
+    setLocationFromPhoto(false);
     setSearchQuery('');
     setShowResults(false);
     setSearchResults([]);
@@ -98,6 +112,7 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
         const pos = [coords.latitude, coords.longitude];
         placePin(pos);
         setFlyTarget(pos);
+        setLocationFromPhoto(false);
         setGeoLoading(false);
       },
       () => {
@@ -114,6 +129,12 @@ function MapPicker({ photo, onConfirm, loading, onBack }) {
           <h2>Mark the Location</h2>
           <p>Search for a place, or tap the map to drop a pin</p>
         </div>
+
+        {locationFromPhoto && (
+          <div className="location-detected-banner">
+            📍 Location found in photo — confirm below or move the pin to adjust
+          </div>
+        )}
 
         <div className="map-picker-map-area">
           {/* Search overlay — floats above the Leaflet map */}
