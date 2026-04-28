@@ -73,6 +73,7 @@ function Guesser() {
         guessCount={guesses.length}
         lastFeedback={lastFeedback}
         onPlayAgain={() => navigate('/')}
+        gameId={gameId}
       />
     );
   }

@@ -46,31 +46,31 @@
 }
 
 .btn-primary {
-  background-color: #3b82f6;
+  background-color: #E44947;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: #cc3b39;
 }
 
 .btn-secondary {
-  background-color: #10b981;
-  color: white;
+  background-color: #FFCCD6;
+  color: #E44947;
 }
 
 .btn-secondary:hover {
-  background-color: #059669;
+  background-color: #ffb3c1;
 }
 
 .btn-ghost {
   background-color: transparent;
-  color: #3b82f6;
-  border: 2px solid #3b82f6;
+  color: #E44947;
+  border: 2px solid #E44947;
 }
 
 .btn-ghost:hover {
-  background-color: #eff6ff;
+  background-color: #fff5f5;
 }
 
 .btn:disabled {
@@ -140,7 +140,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid #e5e7eb;
-  border-top-color: #3b82f6;
+  border-top-color: #E44947;
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
 }

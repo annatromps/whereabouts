@@ -40,12 +40,12 @@
 .location-detected-banner {
   margin: 0 16px 10px;
   padding: 10px 14px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-left: 3px solid #3b82f6;
+  background: #fff5f5;
+  border: 1px solid #ffd6d6;
+  border-left: 3px solid #E44947;
   border-radius: 6px;
   font-size: 0.85rem;
-  color: #1e40af;
+  color: #c73533;
   line-height: 1.4;
   flex-shrink: 0;
 }
@@ -140,7 +140,7 @@
 
 .map-search-result:hover,
 .map-search-result:active {
-  background: #f0f4ff;
+  background: #fff5f5;
 }
 
 /* ── Bottom controls ── */

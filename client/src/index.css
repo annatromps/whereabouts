@@ -27,7 +27,7 @@ button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
-  background-color: #3b82f6;
+  background-color: #E44947;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -38,7 +38,7 @@ button {
 }
 
 button:hover {
-  background-color: #2563eb;
+  background-color: #cc3b39;
 }
 
 button:active {
@@ -61,8 +61,8 @@ input[type="text"]:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #E44947;
+  box-shadow: 0 0 0 3px rgba(228, 73, 71, 0.1);
 }
 
 .card {

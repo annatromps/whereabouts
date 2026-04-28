@@ -4,7 +4,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #E44947 0%, #c73533 100%);
   padding: 20px;
 }
 
@@ -25,7 +25,7 @@
 .result-title {
   text-align: center;
   margin-bottom: 30px;
-  color: #10b981;
+  color: #E44947;
   font-size: 2rem;
 }
 
@@ -76,4 +76,5 @@
   padding: 16px;
   font-size: 1.1rem;
   font-weight: 600;
+  display: block;
 }
