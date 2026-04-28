@@ -4,7 +4,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background: linear-gradient(135deg, #E44947 0%, #c73533 100%);
+  background: #FFCCD6;
   padding: 20px;
 }
 
@@ -18,7 +18,7 @@
   max-width: 600px;
   width: 100%;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(228, 73, 71, 0.15);
   overflow-y: auto;
 }
 
