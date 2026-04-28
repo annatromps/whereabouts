@@ -24,31 +24,66 @@ function Creator() {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Reset input immediately so the same file can be re-selected later
+    e.target.value = '';
+
+    console.log('[Creator] File selected:', file.name, file.type, file.size);
+
     setProcessingPhoto(true);
     setError('');
 
     try {
-      const [gps, dataUrl] = await Promise.all([
-        // EXIF extraction — always fail silently
-        exifr.gps(file).catch(() => null),
-        // FileReader — must handle onerror or the promise hangs forever
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = ev => resolve(ev.target.result);
-          reader.onerror = () => reject(new Error('Could not read the selected photo'));
-          reader.readAsDataURL(file);
-        }),
-      ]);
+      // ── Step 1: Read file to data URL (critical — must succeed) ──────────
+      console.log('[Creator] Starting FileReader');
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          console.log('[Creator] FileReader onload, length:', ev.target.result?.length);
+          resolve(ev.target.result);
+        };
+        reader.onerror = (ev) => {
+          console.error('[Creator] FileReader onerror:', ev);
+          reject(new Error('Could not read the selected photo'));
+        };
+        reader.onabort = () => {
+          console.error('[Creator] FileReader aborted');
+          reject(new Error('File read was aborted'));
+        };
+        reader.readAsDataURL(file);
+      });
+
+      console.log('[Creator] File read OK, setting photo state');
+      setPhoto(dataUrl);
+
+      // ── Step 2: Extract GPS from EXIF (optional — never blocks progress) ─
+      console.log('[Creator] Starting EXIF extraction (3s timeout)');
+      let gps = null;
+      try {
+        gps = await Promise.race([
+          exifr.gps(file).catch((err) => {
+            console.log('[Creator] EXIF rejected:', err?.message);
+            return null;
+          }),
+          new Promise((resolve) => setTimeout(() => {
+            console.log('[Creator] EXIF timed out, continuing without GPS');
+            resolve(null);
+          }, 3000)),
+        ]);
+        console.log('[Creator] EXIF result:', gps);
+      } catch (exifErr) {
+        console.log('[Creator] EXIF threw:', exifErr?.message);
+        gps = null;
+      }
 
       setDetectedCoordinates(gps ? { lat: gps.latitude, lng: gps.longitude } : null);
-      setPhoto(dataUrl);
+
+      console.log('[Creator] Advancing to map step');
       setStep('map');
     } catch (err) {
+      console.error('[Creator] handleFileSelect failed:', err);
       setError('Failed to load photo — please try a different image.');
     } finally {
       setProcessingPhoto(false);
-      // Reset so the same file can be re-selected if needed
-      e.target.value = '';
     }
   };
 
@@ -89,7 +124,6 @@ function Creator() {
     setLoading(true);
     setError('');
     try {
-      // Promisify image → canvas → blob so setLoading(false) waits for the whole chain
       const blob = await new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas');
         const img = new Image();
