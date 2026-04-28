@@ -10,24 +10,21 @@
 
 .home-content {
   text-align: center;
-  max-width: 900px;
+  max-width: 480px;
   width: 100%;
   color: white;
 }
 
 .title {
-  font-size: 3.5rem;
+  font-size: 3rem;
   margin-bottom: 12px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .subtitle {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   margin-bottom: 36px;
   opacity: 0.9;
-  max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
   line-height: 1.6;
 }
 
@@ -36,7 +33,7 @@
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  margin-bottom: 64px;
+  margin-bottom: 48px;
 }
 
 .btn-primary {
@@ -53,73 +50,151 @@
   transform: translateY(-2px);
 }
 
-/* How it works section */
+/* ── How it works ── */
 
 .how-it-works {
-  text-align: center;
+  text-align: left;
 }
 
 .how-it-works-label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   opacity: 0.5;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+  text-align: center;
 }
 
+/* Mobile: vertical stacked list */
+
 .features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .feature {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  padding: 32px 24px 28px;
-  backdrop-filter: blur(12px);
-  text-align: left;
-  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.feature:not(:last-child)::after {
-  content: '→';
-  position: absolute;
-  right: -14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.95rem;
-  opacity: 0.3;
-  pointer-events: none;
+.feature:last-child {
+  border-bottom: none;
 }
 
-.step-number {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  opacity: 0.4;
-  margin-bottom: 14px;
+.feature-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  width: 52px;
 }
 
 .feature-icon {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: 14px;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+}
+
+.step-number {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0.4;
+}
+
+.feature-right {
+  flex: 1;
+  padding-top: 3px;
 }
 
 .feature h3 {
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: 0.01em;
+  margin-bottom: 4px;
 }
 
 .feature p {
   font-size: 0.875rem;
-  opacity: 0.75;
+  opacity: 0.8;
   line-height: 1.6;
   margin: 0;
+}
+
+/* Desktop: restore 3-column cards */
+
+@media (min-width: 640px) {
+  .home-content {
+    max-width: 900px;
+  }
+
+  .title {
+    font-size: 3.5rem;
+  }
+
+  .how-it-works {
+    text-align: center;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .feature {
+    flex-direction: column;
+    gap: 0;
+    padding: 28px 24px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    border-bottom: none;
+    position: relative;
+    text-align: left;
+  }
+
+  .feature:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .feature-left {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 14px;
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.4rem;
+  }
+
+  .step-number {
+    font-size: 0.7rem;
+  }
+
+  .feature-right {
+    padding-top: 0;
+  }
 }
