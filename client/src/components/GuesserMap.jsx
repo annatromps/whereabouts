@@ -10,7 +10,7 @@ function MapClickHandler({ onMarkerChange }) {
   return null;
 }
 
-function GuesserMap({ markerPos, onMarkerChange, lastFeedback }) {
+function GuesserMap({ markerPos, onMarkerChange }) {
   const guesserIcon = L.icon({
     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTBjMCA3LTkgMTMtOSAxM3MtOSAtNiAtOSAtMTNhOSA5IDAgMCAxIDE4IDB6Ii8+PC9zdmc+',
     iconSize: [32, 41],
@@ -38,19 +38,6 @@ function GuesserMap({ markerPos, onMarkerChange, lastFeedback }) {
         )}
       </MapContainer>
 
-      {lastFeedback && (
-        <div className="feedback-panel">
-          <div className="feedback slideIn">
-            <div className="temperature-badge" style={{ backgroundColor: lastFeedback.temperatureColor }}>
-              {lastFeedback.temperature}
-            </div>
-            <div className="feedback-text">
-              <p className="distance">📍 {lastFeedback.distance} km away</p>
-              <p className="direction">🧭 {lastFeedback.direction}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

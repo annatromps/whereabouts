@@ -83,11 +83,24 @@ function Guesser() {
         {photo && <img src={photo} alt="Guess this location" />}
         <div className="guess-counter">Guess #{guesses.length + 1}</div>
       </div>
+
+      {lastFeedback && (
+        <div
+          key={guesses.length}
+          className="feedback-bar slideIn"
+          style={{ backgroundColor: lastFeedback.temperatureColor }}
+        >
+          <span className="feedback-temp">{lastFeedback.temperature}</span>
+          <span className="feedback-divider" />
+          <span className="feedback-dist">📍 {lastFeedback.distance} km away</span>
+          <span className="feedback-dir">🧭 {lastFeedback.direction}</span>
+        </div>
+      )}
+
       <div className="guesser-map">
         <GuesserMap
           markerPos={markerPos}
           onMarkerChange={setMarkerPos}
-          lastFeedback={lastFeedback}
         />
       </div>
       <div className="guesser-footer">

@@ -31,6 +31,43 @@
   font-size: 0.9rem;
 }
 
+.feedback-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  height: 52px;
+  color: white;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.feedback-temp {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.feedback-divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.feedback-dist {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.feedback-dir {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
 .guesser-map {
   flex: 1;
   min-height: 0;
