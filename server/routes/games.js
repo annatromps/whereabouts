@@ -90,7 +90,7 @@ router.get('/:gameId', (req, res) => {
         return res.status(404).json({ error: 'Game not found' });
       }
 
-      const photoUrl = `${BASE_URL}/uploads/${row.photo_path}`;
+      const photoUrl = `/uploads/${row.photo_path}`;
       res.json({ photoUrl });
     });
   } catch (error) {
