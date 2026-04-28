@@ -1,0 +1,152 @@
+@keyframes wo-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes wo-fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes wo-slideup {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.wo-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: wo-fadein 0.2s ease-out both;
+}
+
+.wo-hiding {
+  animation: wo-fadeout 0.18s ease-in both;
+}
+
+.wo-modal {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 380px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  animation: wo-slideup 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* ── Header ── */
+
+.wo-header {
+  background: #FFCCD6;
+  padding: 30px 24px 22px;
+  text-align: center;
+}
+
+.wo-logo {
+  width: 54px;
+  height: 54px;
+  background: white;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  color: #E44947;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(228, 73, 71, 0.22);
+}
+
+.wo-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  color: #E44947;
+  margin: 0 0 5px;
+  line-height: 1.1;
+}
+
+.wo-tagline {
+  font-size: 0.88rem;
+  color: #9b1c1c;
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* ── Steps ── */
+
+.wo-steps {
+  padding: 22px 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wo-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.wo-step-icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  background: #fff0f0;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+}
+
+.wo-step strong {
+  display: block;
+  font-size: 0.93rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 2px;
+}
+
+.wo-step p {
+  font-size: 0.81rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ── CTA ── */
+
+.wo-footer {
+  padding: 22px 22px 24px;
+}
+
+.wo-cta {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background: #E44947;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.01em;
+}
+
+.wo-cta:hover {
+  background: #cc3b39;
+  transform: scale(1.01);
+}
+
+.wo-cta:active {
+  transform: scale(0.97);
+}

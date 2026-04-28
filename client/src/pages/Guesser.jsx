@@ -4,6 +4,7 @@ import GuesserMap from '../components/GuesserMap';
 import ResultScreen from '../components/ResultScreen';
 import Lightbox from '../components/Lightbox';
 import ThemedLoader from '../components/ThemedLoader';
+import WelcomeOverlay from '../components/WelcomeOverlay';
 import '../styles/Guesser.css';
 
 function Guesser() {
@@ -112,6 +113,8 @@ function Guesser() {
 
   return (
     <div className="guesser-container">
+      <WelcomeOverlay />
+
       <div className="guesser-photo" onClick={() => setLightboxOpen(true)}>
         {photo && <img src={photo} alt="Guess this location" />}
         <div className="guess-counter">Guess #{guesses.length + 1}</div>
