@@ -84,7 +84,10 @@ function Creator() {
 
           if (!response.ok) throw new Error('Failed to create game');
           const data = await response.json();
-          setGameData(data);
+          setGameData({
+            ...data,
+            shareUrl: `${window.location.origin}/game/${data.gameId}`
+          });
           setStep('share');
         });
       };

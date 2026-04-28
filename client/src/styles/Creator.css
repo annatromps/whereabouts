@@ -12,8 +12,9 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  padding: 40px 20px;
+  padding: 32px 20px;
   max-width: 500px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -35,12 +36,13 @@
 }
 
 .btn {
-  padding: 12px 24px;
+  padding: 13px 24px;
   font-size: 1rem;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
+  min-height: 44px;
 }
 
 .btn-primary {

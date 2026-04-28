@@ -40,7 +40,7 @@ function ShareModal({ gameData }) {
         <div className="qr-section">
           <h3>QR Code</h3>
           <div className="qr-container">
-            <QRCode value={gameData.shareUrl} size={256} level="H" includeMargin={true} />
+            <QRCode value={gameData.shareUrl} size={Math.min(256, window.innerWidth - 100)} level="H" includeMargin={true} />
           </div>
           <button onClick={handleDownloadQR} className="btn btn-secondary">
             📥 Download QR Code

@@ -36,15 +36,31 @@
 
 .map-picker-controls {
   display: flex;
-  gap: 12px;
-  padding: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
   background-color: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
 
 .map-picker-controls button {
   flex: 1;
-  padding: 12px 20px;
+  min-width: 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+}
+
+/* Geolocation button spans full width on its own row on mobile */
+.map-picker-controls .btn-secondary {
+  flex-basis: 100%;
+  order: -1;
+}
+
+@media (min-width: 540px) {
+  .map-picker-controls .btn-secondary {
+    flex-basis: auto;
+    order: 0;
+  }
 }
 
 .geo-error {
