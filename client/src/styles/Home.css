@@ -16,9 +16,13 @@
 }
 
 .title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
   font-size: 3rem;
   margin-bottom: 12px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+  letter-spacing: -0.02em;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .subtitle {
@@ -139,7 +143,7 @@
   }
 
   .title {
-    font-size: 3.5rem;
+    font-size: 3.8rem;
   }
 
   .how-it-works {
