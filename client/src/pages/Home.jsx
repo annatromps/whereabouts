@@ -8,8 +8,10 @@ function Home() {
   return (
     <div className="home-container">
       <div className="home-content">
-        <h1 className="title">📍 Whereabouts</h1>
-        <p className="subtitle">Upload a photo, mark the location, and challenge others to guess where it was taken!</p>
+        <div className="home-hero">
+          <h1 className="title">📍 Whereabouts</h1>
+          <p className="subtitle">Upload a photo, mark the location, and challenge others to guess where it was taken!</p>
+        </div>
 
         <div className="button-group">
           <button className="btn btn-primary" onClick={() => navigate('/create')}>
