@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   background: #FFCCD6;
-  padding: clamp(16px, 3.5dvh, 36px) 20px;
+  padding: clamp(28px, 6dvh, 52px) 24px;
   overflow: auto;
 }
 
@@ -20,8 +20,8 @@
 .title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.8rem, 8vw, 3.5rem);
-  margin-bottom: clamp(4px, 1dvh, 10px);
+  font-size: clamp(2.2rem, 9vw, 4rem);
+  margin-bottom: clamp(8px, 1.5dvh, 14px);
   text-align: left;
   letter-spacing: -0.02em;
   color: #E44947;
@@ -30,8 +30,8 @@
 }
 
 .subtitle {
-  font-size: clamp(0.875rem, 2dvh, 1rem);
-  margin-bottom: clamp(12px, 2.5dvh, 24px);
+  font-size: clamp(0.95rem, 2.2dvh, 1.1rem);
+  margin-bottom: clamp(20px, 3.5dvh, 32px);
   color: #4b5563;
   line-height: 1.5;
   text-align: left;
@@ -42,7 +42,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: clamp(16px, 3dvh, 32px);
+  margin-bottom: clamp(24px, 4.5dvh, 44px);
 }
 
 .btn-primary {
@@ -71,7 +71,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #9ca3af;
-  margin-bottom: clamp(6px, 1dvh, 12px);
+  margin-bottom: clamp(10px, 1.8dvh, 16px);
   text-align: left;
 }
 
@@ -87,7 +87,7 @@
   flex-direction: row;
   align-items: center;
   gap: 14px;
-  padding: clamp(8px, 1.5dvh, 14px) 0;
+  padding: clamp(12px, 2.5dvh, 20px) 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 

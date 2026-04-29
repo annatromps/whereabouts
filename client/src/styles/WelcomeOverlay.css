@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   padding: 20px;
   animation: wo-fadein 0.2s ease-out both;
 }
@@ -47,19 +47,10 @@
   text-align: center;
 }
 
-.wo-logo {
-  width: 54px;
-  height: 54px;
-  background: white;
-  border-radius: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 2rem;
-  color: #E44947;
-  margin-bottom: 12px;
+.wo-logo-svg {
+  display: block;
+  margin: 0 auto 12px;
+  border-radius: 19%;
   box-shadow: 0 4px 14px rgba(228, 73, 71, 0.22);
 }
 

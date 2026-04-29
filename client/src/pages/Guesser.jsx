@@ -18,6 +18,7 @@ function Guesser() {
   const [error, setError] = useState('');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [mapOpen, setMapOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,10 +68,20 @@ function Guesser() {
       setGuesses(prev => [...prev, { coordinates: { lat: markerPos[0], lng: markerPos[1] }, feedback }]);
       setLastFeedback(feedback);
       if (feedback.correct) setGameState('won');
+      else setMapOpen(false); // collapse map after guess so feedback is visible
     } catch (err) {
       setError('Failed to submit guess: ' + err.message);
     } finally {
       setGuessing(false);
+    }
+  };
+
+  // Panel handle tap: if pin is placed and map is closed, submit directly
+  const handlePanelTap = () => {
+    if (!mapOpen && markerPos) {
+      handleSubmitGuess();
+    } else {
+      setMapOpen(o => !o);
     }
   };
 
@@ -81,15 +92,8 @@ function Guesser() {
           <h2>Couldn't load game</h2>
           <p>{error}</p>
           <div className="error-actions">
-            <button
-              className="btn btn-primary"
-              onClick={() => setRetryCount(n => n + 1)}
-            >
-              ↩ Retry
-            </button>
-            <button className="btn btn-ghost" onClick={() => navigate('/')}>
-              ← Go Home
-            </button>
+            <button className="btn btn-primary" onClick={() => setRetryCount(n => n + 1)}>↩ Retry</button>
+            <button className="btn btn-ghost" onClick={() => navigate('/')}>← Go Home</button>
           </div>
         </div>
       </div>
@@ -111,47 +115,67 @@ function Guesser() {
     );
   }
 
+  const panelHandleLabel = (() => {
+    if (mapOpen) return '▼ Collapse map';
+    if (markerPos) return '🎯 Submit your guess!';
+    return '📍 Place your guess on the map';
+  })();
+
   return (
     <div className="guesser-container">
       <WelcomeOverlay />
 
-      <div className="guesser-photo" onClick={() => setLightboxOpen(true)}>
+      {/* Photo area — shrinks when map is open */}
+      <div
+        className={`guesser-photo-area${mapOpen ? ' guesser-photo-area--shrunk' : ''}`}
+        onClick={() => setLightboxOpen(true)}
+      >
         {photo && <img src={photo} alt="Guess this location" />}
         <div className="guess-counter">Guess #{guesses.length + 1}</div>
         <div className="photo-zoom-hint">🔍 Tap to zoom</div>
+
+        {lastFeedback && (
+          <div
+            key={guesses.length}
+            className="feedback-bar slideIn"
+            style={{ backgroundColor: lastFeedback.temperatureColor }}
+          >
+            <span className="feedback-temp">{lastFeedback.temperature}</span>
+            <span className="feedback-divider" />
+            <span className="feedback-dist">📍 {lastFeedback.distance} km away</span>
+            <span className="feedback-dir">🧭 {lastFeedback.direction}</span>
+          </div>
+        )}
       </div>
 
       {lightboxOpen && (
         <Lightbox src={photo} alt="Location photo" onClose={() => setLightboxOpen(false)} />
       )}
 
-      {lastFeedback && (
-        <div
-          key={guesses.length}
-          className="feedback-bar slideIn"
-          style={{ backgroundColor: lastFeedback.temperatureColor }}
-        >
-          <span className="feedback-temp">{lastFeedback.temperature}</span>
-          <span className="feedback-divider" />
-          <span className="feedback-dist">📍 {lastFeedback.distance} km away</span>
-          <span className="feedback-dir">🧭 {lastFeedback.direction}</span>
-        </div>
-      )}
-
-      <div className="guesser-map">
-        <GuesserMap
-          markerPos={markerPos}
-          onMarkerChange={setMarkerPos}
-        />
-      </div>
-      <div className="guesser-footer">
+      {/* Collapsible map panel */}
+      <div className={`guesser-panel${mapOpen ? ' guesser-panel--open' : ''}`}>
         <button
-          onClick={handleSubmitGuess}
-          className="btn btn-primary"
-          disabled={!markerPos || guessing}
+          className={`guesser-panel-handle${markerPos && !mapOpen ? ' guesser-panel-handle--ready' : ''}`}
+          onClick={handlePanelTap}
         >
-          {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Guess this location'}
+          <span className="panel-handle-bar" />
+          <span className="panel-handle-label">{panelHandleLabel}</span>
         </button>
+
+        <div className="guesser-panel-body">
+          <div className="guesser-map">
+            <GuesserMap markerPos={markerPos} onMarkerChange={setMarkerPos} />
+          </div>
+          <div className="guesser-footer">
+            <button
+              onClick={handleSubmitGuess}
+              className="btn btn-primary"
+              disabled={!markerPos || guessing}
+            >
+              {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Guess this location'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

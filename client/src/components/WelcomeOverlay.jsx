@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/WelcomeOverlay.css';
 
-const STORAGE_KEY = 'wa_seen_intro';
-
 const STEPS = [
   {
     icon: '📸',
@@ -12,7 +10,7 @@ const STEPS = [
   {
     icon: '📍',
     heading: 'Drop a pin on the map',
-    detail: 'Tap anywhere you think the photo was taken',
+    detail: 'Open the map at the bottom, then tap where you think it was taken',
   },
   {
     icon: '🌡️',
@@ -21,21 +19,30 @@ const STEPS = [
   },
 ];
 
-function WelcomeOverlay() {
-  // 'visible' | 'hiding' | 'gone'
-  const [phase, setPhase] = useState(() =>
-    localStorage.getItem(STORAGE_KEY) ? 'gone' : 'visible'
+function WLogo() {
+  return (
+    <svg viewBox="0 0 512 512" width="58" height="58" className="wo-logo-svg" aria-hidden="true">
+      <rect width="512" height="512" rx="96" fill="#FFCCD6"/>
+      <polyline
+        points="68,90 154,296 256,194 358,296 444,90"
+        fill="none"
+        stroke="#E44947"
+        strokeWidth="68"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
+}
+
+function WelcomeOverlay() {
+  const [phase, setPhase] = useState('visible'); // always show on every visit
 
   if (phase === 'gone') return null;
 
-  const dismiss = () => {
-    localStorage.setItem(STORAGE_KEY, '1');
-    setPhase('hiding');
-  };
+  const dismiss = () => setPhase('hiding');
 
   const handleAnimationEnd = (e) => {
-    // Only act on the backdrop's own animation, not bubbled events from children
     if (e.target === e.currentTarget && phase === 'hiding') {
       setPhase('gone');
     }
@@ -49,7 +56,7 @@ function WelcomeOverlay() {
     >
       <div className="wo-modal" role="dialog" aria-modal="true" aria-label="How to play">
         <div className="wo-header">
-          <div className="wo-logo" aria-hidden="true">W</div>
+          <WLogo />
           <h1 className="wo-title">Whereabouts</h1>
           <p className="wo-tagline">The photo location guessing game</p>
         </div>

@@ -8,3 +8,72 @@
   width: 100%;
   height: 100%;
 }
+
+/* ── Search overlay ── */
+
+.guesser-search {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 500;
+}
+
+.guesser-search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border-radius: 10px;
+  padding: 0 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  height: 42px;
+}
+
+.guesser-search-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.guesser-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #1f2937;
+  padding: 0;
+  min-width: 0;
+}
+
+.guesser-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.guesser-search-results {
+  background: white;
+  border-radius: 10px;
+  margin-top: 4px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  list-style: none;
+  overflow: hidden;
+}
+
+.guesser-search-result {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #374151;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f4f6;
+  line-height: 1.4;
+}
+
+.guesser-search-result:last-child {
+  border-bottom: none;
+}
+
+.guesser-search-result:hover {
+  background: #fff5f5;
+  color: #E44947;
+}

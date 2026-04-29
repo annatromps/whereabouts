@@ -3,6 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/NavBar.css';
 
+function WLogo() {
+  return (
+    <svg viewBox="0 0 512 512" width="26" height="26"
+         style={{ borderRadius: '22%', display: 'block', flexShrink: 0 }}
+         aria-hidden="true">
+      <rect width="512" height="512" rx="96" fill="#FFCCD6"/>
+      <polyline
+        points="68,90 154,296 256,194 358,296 444,90"
+        fill="none"
+        stroke="#E44947"
+        strokeWidth="68"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function NavBar() {
   const { user, logout, openAuth } = useAuth();
   const [open, setOpen] = useState(false);
@@ -32,7 +50,8 @@ function NavBar() {
   return (
     <nav className="navbar" ref={navRef}>
       <Link to="/" className="navbar-brand" onClick={close}>
-        📍 Whereabouts
+        <WLogo />
+        <span>Whereabouts</span>
       </Link>
 
       <button

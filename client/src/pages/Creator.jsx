@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
+import exifr from 'exifr';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
@@ -46,6 +47,7 @@ function Creator() {
   const [gameData, setGameData] = useState(null);
   const [error, setError] = useState('');
   const [sizeWarning, setSizeWarning] = useState('');
+  const [detectedCoordinates, setDetectedCoordinates] = useState(null);
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -83,6 +85,20 @@ function Creator() {
 
     // Navigate to map straight away — no processing delay
     setStep('map');
+
+    // Background EXIF — silent, never blocks
+    const capturedFile = file;
+    (async () => {
+      try {
+        const gps = await Promise.race([
+          exifr.gps(capturedFile),
+          new Promise(r => setTimeout(() => r(null), 5000))
+        ]);
+        if (gps?.latitude && gps?.longitude) {
+          setDetectedCoordinates({ lat: gps.latitude, lng: gps.longitude });
+        }
+      } catch { /* never throw */ }
+    })();
   };
 
   const startCamera = async () => {
@@ -200,10 +216,10 @@ function Creator() {
           {sizeWarning && <div className="size-warning">{sizeWarning}</div>}
           <MapPicker
             photo={photo}
-            detectedCoordinates={null}
+            detectedCoordinates={detectedCoordinates}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); setDetectedCoordinates(null); }}
           />
         </div>
       )}
