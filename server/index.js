@@ -35,6 +35,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
+// Global error handler — ensures API errors always return JSON (not HTML)
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ error: `Upload error: ${err.message}` });
+  }
+  if (err?.message === 'Only image files are allowed') {
+    return res.status(400).json({ error: err.message });
+  }
+  console.error(err);
+  res.status(500).json({ error: 'Server error' });
+});
+
 app.listen(PORT, () => {
   console.log(`📍 Whereabouts server running on http://localhost:${PORT}`);
 });

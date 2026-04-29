@@ -7,8 +7,11 @@ import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
 // Returns a Blob. Falls back to the original if anything goes wrong.
+// 10-second safety timeout guards against canvas.toBlob never firing.
 function resizeImage(source, maxDim = 1200) {
   return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(source), 10000);
+
     const url = URL.createObjectURL(source);
     const img = new Image();
 
@@ -24,14 +27,14 @@ function resizeImage(source, maxDim = 1200) {
       canvas.height = th;
       canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
 
-      canvas.toBlob(
-        (blob) => resolve(blob ?? source),
-        'image/jpeg',
-        0.85
-      );
+      canvas.toBlob((blob) => {
+        clearTimeout(timer);
+        resolve(blob ?? source);
+      }, 'image/jpeg', 0.85);
     };
 
     img.onerror = () => {
+      clearTimeout(timer);
       URL.revokeObjectURL(url);
       resolve(source);
     };
@@ -214,12 +217,13 @@ function Creator() {
       {step === 'map' && photo && (
         <div className="creator-map-section">
           {sizeWarning && <div className="size-warning">{sizeWarning}</div>}
+          {error && <div className="error-banner">⚠️ {error}</div>}
           <MapPicker
             photo={photo}
             detectedCoordinates={detectedCoordinates}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); setDetectedCoordinates(null); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); setDetectedCoordinates(null); setError(''); }}
           />
         </div>
       )}

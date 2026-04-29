@@ -137,3 +137,14 @@
   text-align: center;
 }
 
+.error-banner {
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  text-align: center;
+  border-bottom: 1px solid #fecaca;
+  flex-shrink: 0;
+}
+
