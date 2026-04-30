@@ -67,8 +67,14 @@ function Guesser() {
       const feedback = await response.json();
       setGuesses(prev => [...prev, { coordinates: { lat: markerPos[0], lng: markerPos[1] }, feedback }]);
       setLastFeedback(feedback);
-      if (feedback.correct) setGameState('won');
-      else setMapOpen(false); // collapse map after guess so feedback is visible
+      if (feedback.correct) {
+        setGameState('won');
+      } else {
+        // Reset pin so the user places a fresh one for the next guess.
+        // Collapse the map so the feedback in the handle is visible.
+        setMarkerPos(null);
+        setMapOpen(false);
+      }
     } catch (err) {
       setError('Failed to submit guess: ' + err.message);
     } finally {
@@ -76,14 +82,8 @@ function Guesser() {
     }
   };
 
-  // Panel handle tap: if pin is placed and map is closed, submit directly
-  const handlePanelTap = () => {
-    if (!mapOpen && markerPos) {
-      handleSubmitGuess();
-    } else {
-      setMapOpen(o => !o);
-    }
-  };
+  // Handle always just toggles the map — no auto-submit on tap
+  const handlePanelTap = () => setMapOpen(o => !o);
 
   if (gameState === 'error') {
     return (
@@ -115,12 +115,6 @@ function Guesser() {
     );
   }
 
-  const panelHandleLabel = (() => {
-    if (mapOpen) return '▼ Collapse map';
-    if (markerPos) return '🎯 Submit your guess!';
-    return '📍 Place your guess on the map';
-  })();
-
   return (
     <div className="guesser-container">
       <WelcomeOverlay />
@@ -133,19 +127,6 @@ function Guesser() {
         {photo && <img src={photo} alt="Guess this location" />}
         <div className="guess-counter">Guess #{guesses.length + 1}</div>
         <div className="photo-zoom-hint">🔍 Tap to zoom</div>
-
-        {lastFeedback && (
-          <div
-            key={guesses.length}
-            className="feedback-bar slideIn"
-            style={{ backgroundColor: lastFeedback.temperatureColor }}
-          >
-            <span className="feedback-temp">{lastFeedback.temperature}</span>
-            <span className="feedback-divider" />
-            <span className="feedback-dist">📍 {lastFeedback.distance} km away</span>
-            <span className="feedback-dir">🧭 {lastFeedback.direction}</span>
-          </div>
-        )}
       </div>
 
       {lightboxOpen && (
@@ -154,17 +135,45 @@ function Guesser() {
 
       {/* Collapsible map panel */}
       <div className={`guesser-panel${mapOpen ? ' guesser-panel--open' : ''}`}>
-        <button
-          className={`guesser-panel-handle${markerPos && !mapOpen ? ' guesser-panel-handle--ready' : ''}`}
-          onClick={handlePanelTap}
-        >
+
+        {/*
+          Handle doubles as feedback display:
+          - Map open → "▼ Collapse map"
+          - Map closed, feedback exists → temperature · km · direction
+          - Map closed, no feedback → "📍 Place your guess on the map"
+          Tapping always toggles the map.
+        */}
+        <button className="guesser-panel-handle" onClick={handlePanelTap}>
           <span className="panel-handle-bar" />
-          <span className="panel-handle-label">{panelHandleLabel}</span>
+          {mapOpen ? (
+            <span className="panel-handle-label">▼ Collapse map</span>
+          ) : lastFeedback ? (
+            <div key={guesses.length} className="panel-handle-feedback slideIn">
+              <span
+                className="phf-temp"
+                style={{ color: lastFeedback.temperatureColor }}
+              >
+                {lastFeedback.temperature}
+              </span>
+              <span className="phf-sep" />
+              <span className="phf-dist">📍 {lastFeedback.distance} km away</span>
+              <span className="phf-sep" />
+              <span className="phf-dir">🧭 {lastFeedback.direction}</span>
+              <span className="phf-hint">— tap to guess again</span>
+            </div>
+          ) : (
+            <span className="panel-handle-label">📍 Place your guess on the map</span>
+          )}
         </button>
 
         <div className="guesser-panel-body">
           <div className="guesser-map">
-            <GuesserMap markerPos={markerPos} onMarkerChange={setMarkerPos} />
+            {/* isVisible triggers map.invalidateSize() after the CSS transition */}
+            <GuesserMap
+              markerPos={markerPos}
+              onMarkerChange={setMarkerPos}
+              isVisible={mapOpen}
+            />
           </div>
           <div className="guesser-footer">
             <button

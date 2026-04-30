@@ -18,7 +18,17 @@ function MapClickHandler({ onMarkerChange }) {
   return null;
 }
 
-function GuesserMap({ markerPos, onMarkerChange }) {
+function InvalidateSize({ trigger }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!trigger) return;
+    const id = setTimeout(() => map.invalidateSize(), 370);
+    return () => clearTimeout(id);
+  }, [trigger]);
+  return null;
+}
+
+function GuesserMap({ markerPos, onMarkerChange, isVisible }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -107,6 +117,7 @@ function GuesserMap({ markerPos, onMarkerChange }) {
         />
         <MapClickHandler onMarkerChange={onMarkerChange} />
         <FlyTo target={flyTarget} />
+        <InvalidateSize trigger={isVisible} />
         {markerPos && (
           <Marker position={markerPos} icon={guesserIcon}>
             <Popup>
