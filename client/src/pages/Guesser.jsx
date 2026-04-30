@@ -54,8 +54,11 @@ function Guesser() {
     return () => { clearTimeout(timeoutId); controller.abort(); };
   }, [gameId, retryCount]);
 
+  const isValidPos = (pos) =>
+    Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
+
   const handleSubmitGuess = async () => {
-    if (!markerPos || guessing) return;
+    if (!isValidPos(markerPos) || guessing) return;
     setGuessing(true);
     try {
       const response = await fetch(`/api/games/${gameId}/guess`, {
@@ -179,9 +182,13 @@ function Guesser() {
             <button
               onClick={handleSubmitGuess}
               className="btn btn-primary"
-              disabled={!markerPos || guessing}
+              disabled={!isValidPos(markerPos) || guessing}
             >
-              {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Guess this location'}
+              {guessing
+                ? <><ThemedLoader variant="dots" />Submitting…</>
+                : isValidPos(markerPos)
+                  ? '🎯 Guess this location'
+                  : '📍 Tap the map to place your pin'}
             </button>
           </div>
         </div>

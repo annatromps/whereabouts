@@ -3,17 +3,24 @@ import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'rea
 import L from 'leaflet';
 import '../styles/GuesserMap.css';
 
+const isValidPos = (pos) =>
+  Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
+
 function FlyTo({ target }) {
   const map = useMap();
   useEffect(() => {
-    if (target) map.flyTo(target, Math.max(map.getZoom(), 5));
+    if (!isValidPos(target)) return;
+    map.flyTo(target, Math.max(map.getZoom(), 5));
   }, [target]);
   return null;
 }
 
 function MapClickHandler({ onMarkerChange }) {
   useMapEvent('click', (e) => {
-    onMarkerChange([e.latlng.lat, e.latlng.lng]);
+    const { lat, lng } = e.latlng;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      onMarkerChange([lat, lng]);
+    }
   });
   return null;
 }
@@ -71,6 +78,7 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible }) {
   const handleSelectResult = (result) => {
     const lat = parseFloat(result.lat);
     const lng = parseFloat(result.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     onMarkerChange([lat, lng]);
     setFlyTarget([lat, lng]);
     setSearchQuery('');
@@ -118,7 +126,7 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible }) {
         <MapClickHandler onMarkerChange={onMarkerChange} />
         <FlyTo target={flyTarget} />
         <InvalidateSize trigger={isVisible} />
-        {markerPos && (
+        {isValidPos(markerPos) && (
           <Marker position={markerPos} icon={guesserIcon}>
             <Popup>
               <div>
