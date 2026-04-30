@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { gps as readExifGps } from 'exifr';
 import ThemedLoader from './ThemedLoader';
 import '../styles/MapPicker.css';
 
@@ -26,11 +27,12 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ photo, detectedCoordinates, exifStatus, onConfirm, loading, onBack }) {
+function MapPicker({ file, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
   const [locationFromPhoto, setLocationFromPhoto] = useState(false);
+  const [exifStatus, setExifStatus] = useState(null); // null|'reading'|'found'|'not-found'|'error'
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoError, setGeoError] = useState('');
 
@@ -76,18 +78,41 @@ function MapPicker({ photo, detectedCoordinates, exifStatus, onConfirm, loading,
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Apply EXIF GPS coordinates once they arrive from Creator.
-  // Only fires if the user hasn't already manually placed a pin.
+  // Read GPS from the raw file as soon as MapPicker mounts with it.
   useEffect(() => {
-    if (!detectedCoordinates) return;
-    if (manualPinRef.current) return; // don't override a user-placed pin
+    if (!file) return;
+    let cancelled = false;
+    setExifStatus('reading');
+    console.log('[EXIF] Reading file:', file.name ?? '(blob)', file.type, file.size + ' bytes');
 
-    const pos = [detectedCoordinates.lat, detectedCoordinates.lng];
-    setMarkerPos(pos);
-    setCoordinates({ lat: pos[0], lng: pos[1] });
-    setFlyTarget(pos);
-    setLocationFromPhoto(true);
-  }, [detectedCoordinates]);
+    readExifGps(file)
+      .then(gps => {
+        if (cancelled) return;
+        console.log('[EXIF] exifr.gps() returned:', gps);
+        if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) {
+          console.log('[EXIF] GPS found — lat:', gps.latitude, 'lng:', gps.longitude);
+          setExifStatus('found');
+          if (!manualPinRef.current) {
+            const pos = [gps.latitude, gps.longitude];
+            setMarkerPos(pos);
+            setCoordinates({ lat: pos[0], lng: pos[1] });
+            setFlyTarget(pos);
+            setLocationFromPhoto(true);
+          }
+        } else {
+          console.log('[EXIF] No GPS data in this photo');
+          setExifStatus('not-found');
+        }
+      })
+      .catch(err => {
+        if (!cancelled) {
+          console.log('[EXIF] Error reading file:', err?.message);
+          setExifStatus('error');
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [file]);
 
   // Place a pin programmatically (EXIF / geolocation / search)
   const placePin = (pos) => {

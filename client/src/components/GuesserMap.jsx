@@ -6,6 +6,18 @@ import '../styles/GuesserMap.css';
 const isValidPos = (pos) =>
   Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
 
+const makePinIcon = (color, filled = false, size = [32, 41]) => L.icon({
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${filled ? color : 'none'}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9 -6 -9 -13a9 9 0 0 1 18 0z"/></svg>`
+  ),
+  iconSize: size,
+  iconAnchor: [size[0] / 2, size[1]],
+  popupAnchor: [0, -size[1]]
+});
+
+const currentIcon = makePinIcon('#3b82f6');
+const pastIcon = makePinIcon('#9ca3af', true, [22, 28]);
+
 function FlyTo({ target }) {
   const map = useMap();
   useEffect(() => {
@@ -35,19 +47,12 @@ function InvalidateSize({ trigger }) {
   return null;
 }
 
-function GuesserMap({ markerPos, onMarkerChange, isVisible }) {
+function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
-
-  const guesserIcon = L.icon({
-    iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTBjMCA3LTkgMTMtOSAxM3MtOSAtNiAtOSAtMTNhOSA5IDAgMCAxIDE4IDB6Ii8+PC9zdmc+',
-    iconSize: [32, 41],
-    iconAnchor: [16, 41],
-    popupAnchor: [0, -41]
-  });
 
   // Debounced Nominatim search
   useEffect(() => {
@@ -126,8 +131,22 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible }) {
         <MapClickHandler onMarkerChange={onMarkerChange} />
         <FlyTo target={flyTarget} />
         <InvalidateSize trigger={isVisible} />
+        {pastGuesses.map((g, i) => {
+          const pos = [g.coordinates.lat, g.coordinates.lng];
+          if (!isValidPos(pos)) return null;
+          return (
+            <Marker key={`past-${i}`} position={pos} icon={pastIcon}>
+              <Popup>
+                <div>
+                  <strong>Guess #{i + 1}</strong>
+                  <p>{g.feedback.temperature} · {g.feedback.distance} km {g.feedback.direction}</p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
         {isValidPos(markerPos) && (
-          <Marker position={markerPos} icon={guesserIcon}>
+          <Marker position={markerPos} icon={currentIcon}>
             <Popup>
               <div>
                 <p>Lat: {markerPos[0].toFixed(4)}</p>

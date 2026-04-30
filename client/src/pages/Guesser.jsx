@@ -176,6 +176,7 @@ function Guesser() {
               markerPos={markerPos}
               onMarkerChange={setMarkerPos}
               isVisible={mapOpen}
+              pastGuesses={guesses}
             />
           </div>
           <div className="guesser-footer">
