@@ -19,7 +19,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
+function MapPicker({ photo, detectedCoordinates, exifStatus, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -140,6 +140,21 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
           <p>Search for a place, or tap the map to drop a pin</p>
         </div>
 
+        {exifStatus === 'reading' && (
+          <div className="exif-status exif-status--reading">
+            🔍 Reading location data…
+          </div>
+        )}
+        {exifStatus === 'not-found' && (
+          <div className="exif-status exif-status--none">
+            ℹ️ No location data in this photo
+          </div>
+        )}
+        {exifStatus === 'error' && (
+          <div className="exif-status exif-status--error">
+            ⚠️ Couldn't read location data from this photo
+          </div>
+        )}
         {locationFromPhoto && (
           <div className="location-detected-banner">
             📍 Location detected from photo — tap Confirm or move the pin to adjust

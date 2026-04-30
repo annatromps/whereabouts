@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
-import { gps as readExifGps } from 'exifr';
+import { gps as readExifGps, parse as exifrParse } from 'exifr';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
@@ -51,6 +51,7 @@ function Creator() {
   const [error, setError] = useState('');
   const [sizeWarning, setSizeWarning] = useState('');
   const [detectedCoordinates, setDetectedCoordinates] = useState(null);
+  const [exifStatus, setExifStatus] = useState(null); // null | 'reading' | 'found' | 'not-found' | 'error'
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -91,21 +92,42 @@ function Creator() {
 
     // Background EXIF — fires after map is rendered, never blocks the UI
     const capturedFile = file;
+    setExifStatus('reading');
     (async () => {
       try {
-        const gps = await Promise.race([
+        console.log('[EXIF] Starting GPS read — file:', capturedFile.name, capturedFile.type, `${(capturedFile.size / 1024).toFixed(1)} KB`);
+
+        // Primary: exifr.gps() shortcut
+        let gps = await Promise.race([
           readExifGps(capturedFile),
           new Promise(r => setTimeout(() => r(null), 6000))
         ]);
-        // Use typeof check so lat=0 / lng=0 (valid coordinates) aren't skipped
+        console.log('[EXIF] exifr.gps() raw result:', gps);
+
+        // Fallback: exifr.parse() with gps segment enabled
+        if (gps == null || typeof gps.latitude !== 'number') {
+          console.log('[EXIF] Primary returned nothing — trying exifr.parse() fallback…');
+          const parsed = await Promise.race([
+            exifrParse(capturedFile, { gps: true, ifd0: false, exif: false, iptc: false, xmp: false }),
+            new Promise(r => setTimeout(() => r(null), 6000))
+          ]);
+          console.log('[EXIF] exifr.parse() fallback result:', parsed);
+          if (parsed != null && typeof parsed.latitude === 'number' && typeof parsed.longitude === 'number') {
+            gps = { latitude: parsed.latitude, longitude: parsed.longitude };
+          }
+        }
+
         if (gps != null && typeof gps.latitude === 'number' && typeof gps.longitude === 'number') {
           console.log('[EXIF] GPS found:', gps.latitude, gps.longitude);
           setDetectedCoordinates({ lat: gps.latitude, lng: gps.longitude });
+          setExifStatus('found');
         } else {
-          console.log('[EXIF] No GPS data in photo');
+          console.log('[EXIF] No GPS data in this photo');
+          setExifStatus('not-found');
         }
       } catch (err) {
-        console.log('[EXIF] Parse failed (silent):', err?.message);
+        console.log('[EXIF] Parse failed:', err?.message, err);
+        setExifStatus('error');
       }
     })();
   };
@@ -241,9 +263,10 @@ function Creator() {
           <MapPicker
             photo={photo}
             detectedCoordinates={detectedCoordinates}
+            exifStatus={exifStatus}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); setDetectedCoordinates(null); setError(''); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); setDetectedCoordinates(null); setExifStatus(null); setError(''); }}
           />
         </div>
       )}
