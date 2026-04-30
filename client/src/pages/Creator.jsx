@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
-import exifr from 'exifr';
+import { gps as readExifGps } from 'exifr';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
@@ -89,18 +89,24 @@ function Creator() {
     // Navigate to map straight away — no processing delay
     setStep('map');
 
-    // Background EXIF — silent, never blocks
+    // Background EXIF — fires after map is rendered, never blocks the UI
     const capturedFile = file;
     (async () => {
       try {
         const gps = await Promise.race([
-          exifr.gps(capturedFile),
-          new Promise(r => setTimeout(() => r(null), 5000))
+          readExifGps(capturedFile),
+          new Promise(r => setTimeout(() => r(null), 6000))
         ]);
-        if (gps?.latitude && gps?.longitude) {
+        // Use typeof check so lat=0 / lng=0 (valid coordinates) aren't skipped
+        if (gps != null && typeof gps.latitude === 'number' && typeof gps.longitude === 'number') {
+          console.log('[EXIF] GPS found:', gps.latitude, gps.longitude);
           setDetectedCoordinates({ lat: gps.latitude, lng: gps.longitude });
+        } else {
+          console.log('[EXIF] No GPS data in photo');
         }
-      } catch { /* never throw */ }
+      } catch (err) {
+        console.log('[EXIF] Parse failed (silent):', err?.message);
+      }
     })();
   };
 

@@ -33,6 +33,8 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
   const [showResults, setShowResults] = useState(false);
 
   const mapRef = useRef(null);
+  // Track whether the user has manually placed a pin so EXIF won't clobber it
+  const manualPinRef = useRef(false);
 
   const customIcon = L.icon({
     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZjAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTBjMCA3LTkgMTMtOSAxM3MtOSAtNiAtOSAtMTNhOSA5IDAgMCAxIDE4IDB6Ii8+PC9zdmc+',
@@ -67,23 +69,28 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Auto-place pin from EXIF GPS if the uploaded photo had coordinates
+  // Apply EXIF GPS coordinates once they arrive from Creator.
+  // Only fires if the user hasn't already manually placed a pin.
   useEffect(() => {
-    if (detectedCoordinates) {
-      const pos = [detectedCoordinates.lat, detectedCoordinates.lng];
-      setMarkerPos(pos);
-      setCoordinates({ lat: pos[0], lng: pos[1] });
-      setFlyTarget(pos);
-      setLocationFromPhoto(true);
-    }
+    if (!detectedCoordinates) return;
+    if (manualPinRef.current) return; // don't override a user-placed pin
+
+    const pos = [detectedCoordinates.lat, detectedCoordinates.lng];
+    setMarkerPos(pos);
+    setCoordinates({ lat: pos[0], lng: pos[1] });
+    setFlyTarget(pos);
+    setLocationFromPhoto(true);
   }, [detectedCoordinates]);
 
+  // Place a pin programmatically (EXIF / geolocation / search)
   const placePin = (pos) => {
     setMarkerPos(pos);
     setCoordinates({ lat: pos[0], lng: pos[1] });
   };
 
+  // User tapped the map — mark as manual so EXIF won't override later
   const handleMapClick = (pos) => {
+    manualPinRef.current = true;
     placePin(pos);
     setFlyTarget(null);
     setLocationFromPhoto(false);
@@ -93,6 +100,7 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
     const lat = parseFloat(result.lat);
     const lng = parseFloat(result.lon);
     const pos = [lat, lng];
+    manualPinRef.current = true;
     placePin(pos);
     setFlyTarget(pos);
     setLocationFromPhoto(false);
@@ -111,6 +119,7 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         const pos = [coords.latitude, coords.longitude];
+        manualPinRef.current = true;
         placePin(pos);
         setFlyTarget(pos);
         setLocationFromPhoto(false);
@@ -133,7 +142,7 @@ function MapPicker({ photo, detectedCoordinates, onConfirm, loading, onBack }) {
 
         {locationFromPhoto && (
           <div className="location-detected-banner">
-            📍 Location found in photo — confirm below or move the pin to adjust
+            📍 Location detected from photo — tap Confirm or move the pin to adjust
           </div>
         )}
 
