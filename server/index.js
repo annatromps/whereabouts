@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { initDb } from './db.js';
@@ -25,6 +26,9 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 await initDb();
 
 // Routes
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', env: process.env.NODE_ENV || 'development', port: PORT });
+});
 app.use('/api/auth', authRouter);
 app.use('/api/games', gamesRouter);
 
@@ -46,5 +50,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+  const distPath = path.join(__dirname, '../client/dist');
+  const distExists = fs.existsSync(distPath);
   console.log(`📍 Whereabouts server running on http://localhost:${PORT}`);
+  console.log(`📦 client/dist: ${distExists ? '✅ found' : '❌ MISSING — frontend will not load'}`);
 });

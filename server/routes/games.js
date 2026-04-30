@@ -20,6 +20,7 @@ const upload = multer({
 
 // POST /api/games — Create a new game
 router.post('/', upload.single('photo'), (req, res) => {
+  console.log('[games] POST /api/games hit — file:', req.file ? `${req.file.size} bytes, ${req.file.mimetype}` : 'MISSING', '| body keys:', Object.keys(req.body));
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No photo provided' });

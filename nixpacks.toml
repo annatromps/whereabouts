@@ -1,0 +1,9 @@
+# Railway build config — installs client deps and builds React before starting Express
+[phases.install]
+cmds = ["npm install", "cd client && npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["cd client && npm run build"]
+
+[start]
+cmd = "node server/index.js"
