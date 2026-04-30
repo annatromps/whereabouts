@@ -15,13 +15,11 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/dist')));
-app.use('/uploads', express.static(UPLOAD_DIR));
 
 // Initialize database
 await initDb();

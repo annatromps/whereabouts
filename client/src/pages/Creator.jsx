@@ -153,13 +153,24 @@ function Creator() {
       formData.append('lat', coordinates.lat);
       formData.append('lng', coordinates.lng);
 
+      console.log('[Creator] POST /api/games', {
+        blobSize: blob.size,
+        lat: coordinates.lat,
+        lng: coordinates.lng
+      });
+
       const response = await fetch('/api/games', { method: 'POST', body: formData });
+
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
+        const text = await response.text();
+        console.error('[Creator] Server error:', response.status, text);
+        let body = {};
+        try { body = JSON.parse(text); } catch { /* non-JSON body */ }
         throw new Error(body.error || `Server error (${response.status})`);
       }
 
       const data = await response.json();
+      console.log('[Creator] Game created:', data.gameId);
 
       if (previewUrlRef.current) {
         URL.revokeObjectURL(previewUrlRef.current);
@@ -172,7 +183,10 @@ function Creator() {
       });
       setStep('share');
     } catch (err) {
-      setError('Failed to create game: ' + err.message);
+      console.error('[Creator] Upload failed:', err);
+      setError(err.message.startsWith('Server error') || err.message.startsWith('Failed')
+        ? err.message
+        : 'Upload failed: ' + err.message);
     } finally {
       setLoading(false);
     }
