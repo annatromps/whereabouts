@@ -6,17 +6,24 @@ import '../styles/GuesserMap.css';
 const isValidPos = (pos) =>
   Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
 
-const makePinIcon = (color, filled = false, size = [32, 41]) => L.icon({
+// Active (not-yet-submitted) pin — red teardrop
+const activePinIcon = L.icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${filled ? color : 'none'}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9 -6 -9 -13a9 9 0 0 1 18 0z"/></svg>`
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E44947" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9 -6 -9 -13a9 9 0 0 1 18 0z"/></svg>'
   ),
-  iconSize: size,
-  iconAnchor: [size[0] / 2, size[1]],
-  popupAnchor: [0, -size[1]]
+  iconSize: [32, 41],
+  iconAnchor: [16, 41],
+  popupAnchor: [0, -41]
 });
 
-const currentIcon = makePinIcon('#3b82f6');
-const pastIcon = makePinIcon('#9ca3af', true, [22, 28]);
+// Numbered circle using the guess's temperature colour
+const makeNumberedIcon = (color, number) => L.divIcon({
+  className: '',
+  html: `<div class="guess-pin" style="background:${color}">${number}</div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16]
+});
 
 function FlyTo({ target }) {
   const map = useMap();
@@ -134,8 +141,9 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
         {pastGuesses.map((g, i) => {
           const pos = [g.coordinates.lat, g.coordinates.lng];
           if (!isValidPos(pos)) return null;
+          const icon = makeNumberedIcon(g.feedback.temperatureColor, i + 1);
           return (
-            <Marker key={`past-${i}`} position={pos} icon={pastIcon}>
+            <Marker key={`past-${i}`} position={pos} icon={icon}>
               <Popup>
                 <div>
                   <strong>Guess #{i + 1}</strong>
@@ -146,7 +154,7 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
           );
         })}
         {isValidPos(markerPos) && (
-          <Marker position={markerPos} icon={currentIcon}>
+          <Marker position={markerPos} icon={activePinIcon}>
             <Popup>
               <div>
                 <p>Lat: {markerPos[0].toFixed(4)}</p>
