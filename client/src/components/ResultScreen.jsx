@@ -22,6 +22,10 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId }) {
   const score = calcScore(lastFeedback.distance, guessCount);
   const { emoji, text } = guessLabel(guessCount);
 
+  const answerLat = Number.isFinite(lastFeedback.answerLat) ? lastFeedback.answerLat : 0;
+  const answerLng = Number.isFinite(lastFeedback.answerLng) ? lastFeedback.answerLng : 0;
+  const hasValidAnswer = Number.isFinite(lastFeedback.answerLat) && Number.isFinite(lastFeedback.answerLng);
+
   const answerIcon = L.icon({
     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFNDQ5NDciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTBjMCA3LTkgMTMtOSAxM3MtOSAtNiAtOSAtMTNhOSA5IDAgMCAxIDE4IDB6Ii8+PC9zdmc+',
     iconSize: [32, 41],
@@ -64,15 +68,19 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId }) {
           <span>{lastFeedback.distance} km from the spot</span>
         </div>
 
-        <MapContainer center={[lastFeedback.answerLat, lastFeedback.answerLng]} zoom={6} className="result-map">
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
-          />
-          <Marker position={[lastFeedback.answerLat, lastFeedback.answerLng]} icon={answerIcon}>
-            <Popup>Correct location</Popup>
-          </Marker>
-        </MapContainer>
+        {hasValidAnswer ? (
+          <MapContainer center={[answerLat, answerLng]} zoom={6} className="result-map">
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; OpenStreetMap contributors'
+            />
+            <Marker position={[answerLat, answerLng]} icon={answerIcon}>
+              <Popup>Correct location</Popup>
+            </Marker>
+          </MapContainer>
+        ) : (
+          <div className="result-map result-map--no-coords" />
+        )}
 
         <button onClick={handleShare} className="btn btn-primary btn-large" style={{ marginBottom: '12px' }}>
           {copied ? '✅ Copied to clipboard!' : '📤 Share your score'}

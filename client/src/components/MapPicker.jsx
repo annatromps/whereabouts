@@ -4,17 +4,24 @@ import L from 'leaflet';
 import ThemedLoader from './ThemedLoader';
 import '../styles/MapPicker.css';
 
+const isValidPos = (pos) =>
+  Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
+
 function FlyTo({ target }) {
   const map = useMap();
   useEffect(() => {
-    if (target) map.flyTo(target, Math.max(map.getZoom(), 12));
+    if (!isValidPos(target)) return;
+    map.flyTo(target, Math.max(map.getZoom(), 12));
   }, [target]);
   return null;
 }
 
 function MapClickHandler({ onMapClick }) {
   useMapEvent('click', (e) => {
-    onMapClick([e.latlng.lat, e.latlng.lng]);
+    const { lat, lng } = e.latlng;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      onMapClick([lat, lng]);
+    }
   });
   return null;
 }
@@ -99,6 +106,7 @@ function MapPicker({ photo, detectedCoordinates, exifStatus, onConfirm, loading,
   const handleSelectResult = (result) => {
     const lat = parseFloat(result.lat);
     const lng = parseFloat(result.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     const pos = [lat, lng];
     manualPinRef.current = true;
     placePin(pos);
@@ -199,7 +207,7 @@ function MapPicker({ photo, detectedCoordinates, exifStatus, onConfirm, loading,
             />
             <MapClickHandler onMapClick={handleMapClick} />
             <FlyTo target={flyTarget} />
-            {markerPos && (
+            {isValidPos(markerPos) && (
               <Marker position={markerPos} icon={customIcon}>
                 <Popup>
                   <div>

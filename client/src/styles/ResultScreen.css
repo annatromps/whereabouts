@@ -80,6 +80,13 @@
   overflow: hidden;
 }
 
+.result-map--no-coords {
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (min-height: 700px) {
   .result-map {
     height: 300px;
