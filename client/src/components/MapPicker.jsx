@@ -244,18 +244,14 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
               </ul>
             )}
           </div>
-          {photoSource === 'upload' && (
-            <>
-              <button
-                onClick={handleUseMyLocation}
-                className="map-use-location-btn"
-                disabled={loading || geoLoading}
-              >
-                {geoLoading ? <><ThemedLoader variant="dots" />Getting location…</> : '📍 Use my location'}
-              </button>
-              {geoError && <p className="geo-error">{geoError}</p>}
-            </>
-          )}
+          <button
+            onClick={handleUseMyLocation}
+            className="map-use-location-btn"
+            disabled={loading || geoLoading}
+          >
+            {geoLoading ? <><ThemedLoader variant="dots" />Getting location…</> : '📍 Use my location'}
+          </button>
+          {geoError && <p className="geo-error">{geoError}</p>}
         </div>
 
         <div className="map-picker-map-area">
