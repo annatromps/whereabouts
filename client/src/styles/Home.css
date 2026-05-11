@@ -19,8 +19,8 @@
 .home-content {
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 2.5dvh, 24px);
-  max-width: 480px;
+  gap: clamp(18px, 3.5dvh, 32px);
+  max-width: 580px;
   width: 100%;
   color: #1f2937;
 }
@@ -32,8 +32,8 @@
 .title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.5rem, 7vw, 3rem);
-  margin-bottom: 4px;
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  margin-bottom: 6px;
   text-align: left;
   letter-spacing: -0.02em;
   color: #E44947;
@@ -42,7 +42,7 @@
 }
 
 .subtitle {
-  font-size: clamp(0.82rem, 1.6dvh, 1rem);
+  font-size: clamp(1rem, 2dvh, 1.15rem);
   color: #4b5563;
   line-height: 1.4;
   text-align: left;
@@ -51,12 +51,13 @@
 /* ── CTA button ── */
 
 .home-content .button-group {
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
 }
 
 .home-content .btn-primary {
-  padding: 13px 36px;
+  padding: 16px 48px;
+  font-size: 1.05rem;
   font-weight: 600;
   box-shadow: 0 6px 20px rgba(228, 73, 71, 0.32);
 }
@@ -65,7 +66,7 @@
   transform: translateY(-2px);
 }
 
-/* ── How it works: compact, tight ── */
+/* ── How it works ── */
 
 .how-it-works {
   display: flex;
@@ -74,15 +75,14 @@
 }
 
 .how-it-works-label {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #9ca3af;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
-/* Small fixed gap — no space-between, no flex:1 on items */
 .features {
   display: flex;
   flex-direction: column;
@@ -92,8 +92,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  padding: 9px 0;
+  gap: 14px;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
 
@@ -111,19 +111,19 @@
 }
 
 .feature-icon {
-  width: 36px;
-  height: 36px;
-  font-size: 1.1rem;
+  width: 44px;
+  height: 44px;
+  font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(228, 73, 71, 0.1);
-  border-radius: 10px;
+  border-radius: 12px;
   flex-shrink: 0;
 }
 
 .step-number {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #d1d5db;
@@ -136,16 +136,16 @@
 }
 
 .feature h3 {
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 1px;
+  margin-bottom: 2px;
   color: #1f2937;
 }
 
 .feature p {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: #6b7280;
-  line-height: 1.3;
+  line-height: 1.35;
   margin: 0;
 }
 
@@ -153,17 +153,17 @@
 
 @media (min-width: 640px) {
   .home-content {
-    max-width: 900px;
-    gap: 32px;
+    max-width: 960px;
+    gap: 36px;
   }
 
   .title {
-    font-size: clamp(2.5rem, 5.5vw, 3.8rem);
-    margin-bottom: 8px;
+    font-size: clamp(2.5rem, 5.5vw, 4rem);
+    margin-bottom: 10px;
   }
 
   .subtitle {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   .how-it-works {
@@ -172,20 +172,20 @@
 
   .how-it-works-label {
     text-align: center;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
   .features {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 20px;
   }
 
   .feature {
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
-    padding: 24px 20px;
+    padding: 28px 24px;
     background: white;
     border: 1px solid rgba(228, 73, 71, 0.15);
     border-radius: 20px;
@@ -210,23 +210,23 @@
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .feature-icon {
-    width: 44px;
-    height: 44px;
-    font-size: 1.3rem;
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    font-size: 1.4rem;
+    border-radius: 13px;
   }
 
   .feature h3 {
-    font-size: 1rem;
-    margin-bottom: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
   }
 
   .feature p {
-    font-size: 0.875rem;
+    font-size: 0.95rem;
     line-height: 1.5;
   }
 }

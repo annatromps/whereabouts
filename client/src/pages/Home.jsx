@@ -39,7 +39,7 @@ function Home() {
               </div>
               <div className="feature-right">
                 <h3>Share</h3>
-                <p>Get a unique link and QR code to challenge your friends — no sign-up needed</p>
+                <p>Get a unique link to challenge your friends — no sign-up needed</p>
               </div>
             </div>
             <div className="feature">
