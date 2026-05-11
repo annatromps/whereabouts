@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import GuesserMap from '../components/GuesserMap';
 import ResultScreen from '../components/ResultScreen';
-import Lightbox from '../components/Lightbox';
 import ThemedLoader from '../components/ThemedLoader';
 import WelcomeOverlay from '../components/WelcomeOverlay';
 import '../styles/Guesser.css';
@@ -10,6 +9,7 @@ import '../styles/Guesser.css';
 function Guesser() {
   const { gameId } = useParams();
   const [gameState, setGameState] = useState('loading');
+  const [view, setView] = useState('photo'); // 'photo' | 'map'
   const [photo, setPhoto] = useState(null);
   const [creatorName, setCreatorName] = useState(null);
   const [guesses, setGuesses] = useState([]);
@@ -17,7 +17,6 @@ function Guesser() {
   const [markerPos, setMarkerPos] = useState(null);
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
-  const [photoOpen, setPhotoOpen] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
 
@@ -114,11 +113,36 @@ function Guesser() {
     );
   }
 
+  /* ── Photo view ── */
+  if (view === 'photo') {
+    return (
+      <div className="guesser-photo-screen">
+        <WelcomeOverlay />
+
+        <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
+
+        <div className="guesser-photo-area">
+          <div className="guesser-photo-frame">
+            {photo && <img src={photo} alt="Guess this location" />}
+            <span className="photo-corner photo-corner--tl" />
+            <span className="photo-corner photo-corner--tr" />
+            <span className="photo-corner photo-corner--bl" />
+            <span className="photo-corner photo-corner--br" />
+          </div>
+        </div>
+
+        <div className="guesser-bottom-bar">
+          <button className="guesser-primary-btn" onClick={() => setView('map')}>
+            🗺️ Guess location
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Map view ── */
   return (
     <div className="guesser-container">
-      <WelcomeOverlay />
-
-      {/* Full-screen map */}
       <div className="guesser-map-fullscreen">
         <GuesserMap
           markerPos={markerPos}
@@ -128,15 +152,8 @@ function Guesser() {
         />
       </div>
 
-      {/* Top-left: View Photo button */}
-      <button className="guesser-view-photo-btn" onClick={() => setPhotoOpen(true)}>
-        📷 View photo
-      </button>
-
-      {/* Top-right: Guess counter */}
       <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
 
-      {/* Feedback pill — appears after each wrong guess, sits above submit bar */}
       {lastFeedback && (
         <div key={guesses.length} className="guesser-feedback-pill slideIn">
           <span className="gfp-temp" style={{ color: lastFeedback.temperatureColor }}>
@@ -149,24 +166,22 @@ function Guesser() {
         </div>
       )}
 
-      {/* Bottom: floating submit button */}
-      <div className="guesser-submit-bar">
+      <div className="guesser-map-bottom-bar">
+        <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
+          📷 View photo
+        </button>
         <button
-          onClick={handleSubmitGuess}
           className="guesser-submit-btn"
+          onClick={handleSubmitGuess}
           disabled={!isValidPos(markerPos) || guessing}
         >
           {guessing
             ? <><ThemedLoader variant="dots" />Submitting…</>
             : isValidPos(markerPos)
               ? '🎯 Submit guess'
-              : '📍 Tap the map to place your pin'}
+              : '📍 Tap map to place pin'}
         </button>
       </div>
-
-      {photoOpen && (
-        <Lightbox src={photo} alt="Location photo" onClose={() => setPhotoOpen(false)} />
-      )}
     </div>
   );
 }
