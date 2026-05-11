@@ -91,7 +91,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
         {hasValidAnswer ? (
           <MapContainer center={[answerLat, answerLng]} zoom={6} className="result-map" attributionControl={false}>
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
             <Marker position={[answerLat, answerLng]} icon={answerIcon}>
