@@ -130,9 +130,16 @@ function Guesser() {
         className={`guesser-photo-area${mapOpen ? ' guesser-photo-area--shrunk' : ''}`}
         onClick={() => setLightboxOpen(true)}
       >
-        {photo && <img src={photo} alt="Guess this location" />}
-        <div className="guess-counter">Guess #{guesses.length + 1}</div>
-        <div className="photo-zoom-hint">🔍 Tap to zoom</div>
+        <div className="guesser-photo-frame">
+          {photo && <img src={photo} alt="Guess this location" />}
+          {/* Decorative corner brackets */}
+          <span className="photo-corner photo-corner--tl" />
+          <span className="photo-corner photo-corner--tr" />
+          <span className="photo-corner photo-corner--bl" />
+          <span className="photo-corner photo-corner--br" />
+          <div className="guess-counter">Guess #{guesses.length + 1}</div>
+          <div className="photo-zoom-hint">🔍 Tap to zoom</div>
+        </div>
       </div>
 
       {lightboxOpen && (
