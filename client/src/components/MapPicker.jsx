@@ -27,7 +27,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConfirm, loading, onBack }) {
+function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -78,20 +78,34 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // When Creator resolves geolocation for a camera capture, pre-place the pin.
-  // cameraLocation arrives as a prop (resolved in Creator at capture time) so
-  // the pin appears as soon as — or before — the map finishes opening.
+  // For camera captures, auto-request geolocation as soon as the map opens.
   useEffect(() => {
-    console.log('[MapPicker] cameraLocation effect — cameraLocation:', cameraLocation, '| photoSource:', photoSource, '| manualPin:', manualPinRef.current);
-    if (!cameraLocation || photoSource !== 'camera') return;
-    if (manualPinRef.current) return;
-    const pos = [cameraLocation.lat, cameraLocation.lng];
-    console.log('[MapPicker] Placing pin at', pos);
-    setMarkerPos(pos);
-    setCoordinates({ lat: pos[0], lng: pos[1] });
-    setFlyTarget(pos);
-    setLocationFromPhoto(true);
-  }, [cameraLocation, photoSource]);
+    if (photoSource !== 'camera') return;
+    if (!navigator.geolocation) {
+      setGeoError('Location not available on this device');
+      return;
+    }
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setGeoLoading(false);
+        if (manualPinRef.current) return;
+        const pos = [coords.latitude, coords.longitude];
+        setMarkerPos(pos);
+        setCoordinates({ lat: pos[0], lng: pos[1] });
+        setFlyTarget(pos);
+        setLocationFromPhoto(true);
+      },
+      (err) => {
+        setGeoLoading(false);
+        const msg = err.code === 1
+          ? 'Location permission denied — tap \'Use my location\' or drop a pin manually'
+          : 'Couldn\'t detect location automatically — tap \'Use my location\' or drop a pin manually';
+        setGeoError(msg);
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+    );
+  }, [photoSource]);
 
   // Read GPS from the raw file as soon as MapPicker mounts with it.
   // Camera captures never carry EXIF GPS, so skip entirely for them.

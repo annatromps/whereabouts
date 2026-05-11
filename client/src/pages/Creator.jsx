@@ -53,7 +53,6 @@ function Creator() {
   const [sizeWarning, setSizeWarning] = useState('');
   const [originalFile, setOriginalFile] = useState(null); // passed to MapPicker for EXIF + upload
   const [photoSource, setPhotoSource] = useState('upload'); // 'upload' | 'camera'
-  const [cameraLocation, setCameraLocation] = useState(null); // {lat,lng} from geo at capture time
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -113,27 +112,6 @@ function Creator() {
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
     video.srcObject.getTracks().forEach(t => t.stop());
-
-    // Request device location immediately at capture time.
-    // The result (or null on failure) is passed to MapPicker so the pin
-    // is pre-placed as soon as — or before — the map view opens.
-    setCameraLocation(null);
-    console.log('[GEO] Requesting location at capture time. geolocation available:', !!navigator.geolocation);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
-          console.log('[GEO] Success — lat:', coords.latitude, 'lng:', coords.longitude);
-          setCameraLocation({ lat: coords.latitude, lng: coords.longitude });
-        },
-        (err) => {
-          console.warn('[GEO] Failed — code:', err.code, 'message:', err.message);
-          setCameraLocation(null);
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-      );
-    } else {
-      console.warn('[GEO] navigator.geolocation not available');
-    }
 
     canvas.toBlob((blob) => {
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
@@ -260,10 +238,9 @@ function Creator() {
           <MapPicker
             file={originalFile}
             photoSource={photoSource}
-            cameraLocation={photoSource === 'camera' ? cameraLocation : null}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); setCameraLocation(null); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); }}
           />
         </div>
       )}
