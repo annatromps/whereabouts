@@ -24,7 +24,7 @@ function starRating(n) {
   return '⭐';
 }
 
-function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorName }) {
+function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorName, shareUrl }) {
   const [copied, setCopied] = useState(false);
 
   const score = calcScore(lastFeedback.distance, guessCount);
@@ -41,7 +41,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
   });
 
   const handleShare = async () => {
-    const gameUrl = `${window.location.origin}/game/${gameId}`;
+    const gameUrl = shareUrl || `${window.location.origin}/game/${gameId}`;
     const stars = starRating(guessCount);
     const header = creatorName
       ? `Whereabouts is ${creatorName}? 📍`

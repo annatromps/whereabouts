@@ -12,6 +12,7 @@ function Guesser() {
   const [view, setView] = useState('photo'); // 'photo' | 'map'
   const [photo, setPhoto] = useState(null);
   const [creatorName, setCreatorName] = useState(null);
+  const [shareUrl, setShareUrl] = useState(null);
   const [guesses, setGuesses] = useState([]);
   const [lastFeedback, setLastFeedback] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
@@ -39,6 +40,7 @@ function Guesser() {
         if (!data.photoUrl) throw new Error('Game data missing photo URL');
         setPhoto(data.photoUrl);
         setCreatorName(data.creatorName || null);
+        setShareUrl(data.shareUrl || null);
         setGameState('guessing');
       } catch (err) {
         if (err.name === 'AbortError') {
@@ -111,6 +113,7 @@ function Guesser() {
         onPlayAgain={() => navigate('/')}
         gameId={gameId}
         creatorName={creatorName}
+        shareUrl={shareUrl}
       />
     );
   }

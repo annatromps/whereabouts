@@ -179,10 +179,7 @@ function Creator() {
         previewUrlRef.current = null;
       }
 
-      setGameData({
-        ...data,
-        shareUrl: `${window.location.origin}/game/${data.gameId}`,
-      });
+      setGameData(data);
       setStep('share');
     } catch (err) {
       const isNetworkError = err instanceof TypeError && err.message === 'Failed to fetch';
