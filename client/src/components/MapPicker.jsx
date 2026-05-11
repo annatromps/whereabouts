@@ -27,7 +27,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack }) {
+function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -78,29 +78,18 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // For camera captures: request device geolocation and pre-fill the pin.
+  // When Creator resolves geolocation for a camera capture, pre-place the pin.
+  // cameraLocation arrives as a prop (resolved in Creator at capture time) so
+  // the pin appears as soon as — or before — the map finishes opening.
   useEffect(() => {
-    if (!file || photoSource !== 'camera') return;
-    if (!navigator.geolocation) return;
-
-    setExifStatus('reading');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setExifStatus('found');
-        if (!manualPinRef.current) {
-          const pos = [coords.latitude, coords.longitude];
-          setMarkerPos(pos);
-          setCoordinates({ lat: pos[0], lng: pos[1] });
-          setFlyTarget(pos);
-          setLocationFromPhoto(true);
-        }
-      },
-      () => {
-        setExifStatus(null); // denied or unavailable — silent fallback
-      },
-      { timeout: 10000, maximumAge: 60000 }
-    );
-  }, [file, photoSource]);
+    if (!cameraLocation || photoSource !== 'camera') return;
+    if (manualPinRef.current) return;
+    const pos = [cameraLocation.lat, cameraLocation.lng];
+    setMarkerPos(pos);
+    setCoordinates({ lat: pos[0], lng: pos[1] });
+    setFlyTarget(pos);
+    setLocationFromPhoto(true);
+  }, [cameraLocation, photoSource]);
 
   // Read GPS from the raw file as soon as MapPicker mounts with it.
   // Camera captures never carry EXIF GPS, so skip entirely for them.
@@ -198,9 +187,9 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
           <p>Search for a place, or tap the map to drop a pin</p>
         </div>
 
-        {exifStatus === 'reading' && (
+        {photoSource === 'upload' && exifStatus === 'reading' && (
           <div className="exif-status exif-status--reading">
-            {photoSource === 'camera' ? '📍 Getting your location…' : '🔍 Reading location data…'}
+            🔍 Reading location data…
           </div>
         )}
         {photoSource === 'upload' && exifStatus === 'not-found' && (
