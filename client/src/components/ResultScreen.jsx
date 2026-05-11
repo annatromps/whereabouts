@@ -106,7 +106,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
           {copied ? '✅ Copied to clipboard!' : '📤 Share result'}
         </button>
         <button onClick={onPlayAgain} className="btn btn-large" style={{ background: '#FFCCD6', color: '#E44947' }}>
-          🎮 Play Again
+          🎮 Create my own
         </button>
       </div>
     </div>
