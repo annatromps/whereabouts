@@ -107,7 +107,7 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
           <input
             type="text"
             className="guesser-search-input"
-            placeholder="Search a place to navigate the map…"
+            placeholder="Search a place..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onFocus={() => searchResults.length > 0 && setShowResults(true)}

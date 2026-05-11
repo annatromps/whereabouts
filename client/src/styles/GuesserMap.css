@@ -24,10 +24,10 @@
   align-items: center;
   gap: 8px;
   background: white;
-  border-radius: 10px;
-  padding: 0 12px;
+  border-radius: 24px;
+  padding: 0 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  height: 42px;
+  height: 44px;
 }
 
 .guesser-search-icon {
@@ -76,6 +76,46 @@
 .guesser-search-result:hover {
   background: #fff5f5;
   color: #E44947;
+}
+
+/* ── Zoom controls — mid-right, circular ── */
+
+.guesser-map-instance .leaflet-bottom.leaflet-right {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 12px;
+}
+
+.guesser-map-instance .leaflet-control-zoom {
+  border: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.guesser-map-instance .leaflet-control-zoom-in,
+.guesser-map-instance .leaflet-control-zoom-out {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  border-radius: 50% !important;
+  background: white !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  color: #374151 !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.guesser-map-instance .leaflet-control-zoom-in:hover,
+.guesser-map-instance .leaflet-control-zoom-out:hover {
+  background: #f3f4f6 !important;
 }
 
 /* ── Past guess numbered pins ── */

@@ -1,19 +1,5 @@
 /* ── Shared ── */
 
-.guesser-guess-badge {
-  position: absolute;
-  top: calc(16px + env(safe-area-inset-top, 0px));
-  right: 16px;
-  z-index: 900;
-  background: rgba(0, 0, 0, 0.55);
-  color: white;
-  padding: 9px 16px;
-  border-radius: 22px;
-  font-weight: 600;
-  font-size: 0.88rem;
-  pointer-events: none;
-}
-
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-50%) translateY(6px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }

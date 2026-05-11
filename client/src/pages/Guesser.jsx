@@ -133,8 +133,6 @@ function Guesser() {
           />
         )}
 
-        <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
-
         {instructionsSeen && (
           <button
             className="guesser-info-btn"
@@ -175,8 +173,6 @@ function Guesser() {
           pastGuesses={guesses}
         />
       </div>
-
-      <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
 
       {lastFeedback && (
         <div key={guesses.length} className="guesser-feedback-pill slideIn">
