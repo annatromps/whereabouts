@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode.react';
+import { useAuth } from '../context/AuthContext';
 import '../styles/ShareModal.css';
 
 function ShareModal({ gameData }) {
   const [copied, setCopied] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(gameData.shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    const header = user?.username
+      ? `Whereabouts is ${user.username}? 📍`
+      : 'Whereabouts - can you guess where this was taken? 📍';
+    const shareText = `${header}\nCan you guess where this photo was taken?`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Whereabouts', text: shareText, url: gameData.shareUrl });
+      } catch { /* user cancelled */ }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${shareText}\n${gameData.shareUrl}`);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2500);
+      } catch { /* unavailable */ }
+    }
   };
 
   const handleDownloadQR = () => {
@@ -48,7 +70,10 @@ function ShareModal({ gameData }) {
         </div>
 
         <div className="button-group">
-          <button onClick={() => navigate('/')} className="btn btn-primary">
+          <button onClick={handleShare} className="btn btn-primary">
+            {shareCopied ? '✅ Copied to clipboard!' : '📤 Share Challenge'}
+          </button>
+          <button onClick={() => navigate('/')} className="btn btn-ghost">
             ← Back to Home
           </button>
         </div>

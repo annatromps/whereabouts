@@ -1,7 +1,10 @@
 import express from 'express';
 import multer from 'multer';
+import jwt from 'jsonwebtoken';
 import { getDb } from '../db.js';
 import { generateGameId, calculateDistance, getDirection, getTemperature } from '../utils/gameUtils.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'whereabouts-dev-secret-change-in-production';
 
 const router = express.Router();
 
@@ -34,21 +37,31 @@ router.post('/', upload.single('photo'), (req, res) => {
       return res.status(400).json({ error: 'Invalid coordinates' });
     }
 
+    // Optional auth — attach creator username if a valid JWT is present
+    let creatorUsername = null;
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (token) {
+      try {
+        const payload = jwt.verify(token, JWT_SECRET);
+        creatorUsername = payload.username || null;
+      } catch { /* invalid/expired — anonymous game */ }
+    }
+
     const gameId = generateGameId();
-    // Encode the image as a data URL so it needs no filesystem at all
     const photoData = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const db = getDb();
 
     db.run(
-      'INSERT INTO games (id, photo_path, answer_lat, answer_lng) VALUES (?, ?, ?, ?)',
-      [gameId, photoData, answerLat, answerLng],
+      'INSERT INTO games (id, photo_path, answer_lat, answer_lng, creator_username) VALUES (?, ?, ?, ?, ?)',
+      [gameId, photoData, answerLat, answerLng, creatorUsername],
       (err) => {
         if (err) {
           console.error('[games] DB insert error:', err);
           return res.status(500).json({ error: 'Failed to save game to database' });
         }
-        console.log(`[games] Created game ${gameId} (photo ${req.file.size} bytes)`);
-        res.json({ gameId });
+        console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (photo ${req.file.size} bytes)`);
+        res.json({ gameId, creatorName: creatorUsername });
       }
     );
   } catch (err) {
@@ -62,7 +75,7 @@ router.get('/:gameId', (req, res) => {
   const { gameId } = req.params;
   const db = getDb();
 
-  db.get('SELECT photo_path FROM games WHERE id = ?', [gameId], (err, row) => {
+  db.get('SELECT photo_path, creator_username FROM games WHERE id = ?', [gameId], (err, row) => {
     if (err) {
       console.error('[games] DB fetch error:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -71,12 +84,11 @@ router.get('/:gameId', (req, res) => {
       return res.status(404).json({ error: 'Game not found — it may have expired or the link is invalid' });
     }
 
-    // photo_path is a data URL (new games) or a legacy filename (old games)
     const photoUrl = row.photo_path.startsWith('data:')
       ? row.photo_path
       : `/uploads/${row.photo_path}`;
 
-    res.json({ gameId, photoUrl });
+    res.json({ gameId, photoUrl, creatorName: row.creator_username || null });
   });
 });
 

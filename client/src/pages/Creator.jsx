@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MapPicker from '../components/MapPicker';
 import ShareModal from '../components/ShareModal';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
@@ -43,6 +44,7 @@ function resizeImage(source, maxDim = 1200) {
 }
 
 function Creator() {
+  const { getToken } = useAuth();
   const [step, setStep] = useState('photo');
   const [photo, setPhoto] = useState(null);   // object URL — instant, never crashes
   const [loading, setLoading] = useState(false);
@@ -146,7 +148,12 @@ function Creator() {
         lng: coordinates.lng
       });
 
-      const response = await fetch('/api/games', { method: 'POST', body: formData });
+      const token = getToken();
+      const response = await fetch('/api/games', {
+        method: 'POST',
+        body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
 
       if (!response.ok) {
         const text = await response.text();

@@ -65,6 +65,9 @@ function createTables() {
       )
     `);
 
+    // Migration: add creator_username to existing games tables (silent if already present)
+    db.run('ALTER TABLE games ADD COLUMN creator_username TEXT', () => {});
+
     console.log('✅ Database tables initialized');
   });
 }

@@ -16,7 +16,15 @@ function guessLabel(n) {
   return { emoji: '🌍', text: `${n} guesses – what a journey!` };
 }
 
-function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId }) {
+function starRating(n) {
+  if (n === 1) return '⭐⭐⭐⭐⭐';
+  if (n === 2) return '⭐⭐⭐⭐';
+  if (n === 3) return '⭐⭐⭐';
+  if (n === 4) return '⭐⭐';
+  return '⭐';
+}
+
+function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorName }) {
   const [copied, setCopied] = useState(false);
 
   const score = calcScore(lastFeedback.distance, guessCount);
@@ -34,14 +42,21 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId }) {
 
   const handleShare = async () => {
     const gameUrl = `${window.location.origin}/game/${gameId}`;
-    const shareText = `${emoji} ${text} Can you beat me?`;
+    const stars = starRating(guessCount);
+    const header = creatorName
+      ? `Whereabouts is ${creatorName}? 📍`
+      : 'Whereabouts 📍';
+    const body = `I scored ${stars} in ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'}!\nCan you do better?`;
+    const shareText = `${header}\n${body}`;
 
     if (navigator.share) {
       try {
+        // Pass url separately so the platform handles the link preview
         await navigator.share({ title: 'Whereabouts', text: shareText, url: gameUrl });
-      } catch { /* cancelled */ }
+      } catch { /* user cancelled */ }
     } else {
       try {
+        // Clipboard fallback — URL on its own line for WhatsApp paste
         await navigator.clipboard.writeText(`${shareText}\n${gameUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);

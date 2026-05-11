@@ -11,6 +11,7 @@ function Guesser() {
   const { gameId } = useParams();
   const [gameState, setGameState] = useState('loading');
   const [photo, setPhoto] = useState(null);
+  const [creatorName, setCreatorName] = useState(null);
   const [guesses, setGuesses] = useState([]);
   const [lastFeedback, setLastFeedback] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
@@ -37,6 +38,7 @@ function Guesser() {
         const data = await response.json();
         if (!data.photoUrl) throw new Error('Game data missing photo URL');
         setPhoto(data.photoUrl);
+        setCreatorName(data.creatorName || null);
         setGameState('guessing');
       } catch (err) {
         if (err.name === 'AbortError') {
@@ -114,6 +116,7 @@ function Guesser() {
         lastFeedback={lastFeedback}
         onPlayAgain={() => navigate('/')}
         gameId={gameId}
+        creatorName={creatorName}
       />
     );
   }
