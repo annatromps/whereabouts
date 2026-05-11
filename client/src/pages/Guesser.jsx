@@ -143,10 +143,6 @@ function Guesser() {
         <div className="guesser-photo-area">
           <div className="guesser-photo-frame">
             {photo && <img src={photo} alt="Guess this location" />}
-            <span className="photo-corner photo-corner--tl" />
-            <span className="photo-corner photo-corner--tr" />
-            <span className="photo-corner photo-corner--bl" />
-            <span className="photo-corner photo-corner--br" />
           </div>
         </div>
 

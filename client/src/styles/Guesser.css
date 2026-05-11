@@ -60,45 +60,6 @@
   display: block;
 }
 
-.photo-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.photo-corner--tl {
-  top: 8px;
-  left: 8px;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-left: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 3px 0 0 0;
-}
-
-.photo-corner--tr {
-  top: 8px;
-  right: 8px;
-  border-top: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-right: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0 3px 0 0;
-}
-
-.photo-corner--bl {
-  bottom: 8px;
-  left: 8px;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-left: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0 0 0 3px;
-}
-
-.photo-corner--br {
-  bottom: 8px;
-  right: 8px;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-right: 1.5px solid rgba(255, 255, 255, 0.35);
-  border-radius: 0 0 3px 0;
-}
 
 /* 'i' button — top-left, reopens instructions */
 
@@ -107,13 +68,13 @@
   top: calc(16px + env(safe-area-inset-top, 0px));
   left: 16px;
   z-index: 900;
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.15);
   border: 1.5px solid rgba(255, 255, 255, 0.28);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   font-weight: 700;
   font-style: italic;
   cursor: pointer;
