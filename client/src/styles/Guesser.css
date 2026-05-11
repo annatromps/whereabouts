@@ -177,7 +177,7 @@
 
 /* Subtle win-radius hint — shown on both photo and map views */
 .guesser-win-hint {
-  margin: 6px 0 0;
+  margin: 0;
   text-align: center;
   font-size: 0.78rem;
   font-weight: 500;

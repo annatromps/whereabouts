@@ -187,6 +187,13 @@ function Guesser() {
       )}
 
       <div className="guesser-map-bottom-bar">
+        {!isValidPos(markerPos) && !guessing && (
+          <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
+        )}
+        <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
+          📷 View photo
+        </button>
+        <p className="guesser-win-hint">Get within {winRadius} km to win</p>
         {isValidPos(markerPos) && (
           <button
             className="guesser-submit-btn"
@@ -196,13 +203,6 @@ function Guesser() {
             {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Submit guess'}
           </button>
         )}
-        {!isValidPos(markerPos) && !guessing && (
-          <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
-        )}
-        <p className="guesser-win-hint">Get within {winRadius} km to win</p>
-        <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
-          📷 View photo
-        </button>
       </div>
     </div>
   );
