@@ -211,7 +211,7 @@ function Creator() {
   return (
     <div className="creator-container">
       {step === 'photo' && (
-        <div className="creator-photo-section card">
+        <div className="creator-photo-section">
           <h1>📸 Create a Game</h1>
           <p>Choose how you want to add a photo:</p>
           <div className="button-group">
