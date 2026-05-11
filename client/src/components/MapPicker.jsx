@@ -178,7 +178,8 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
         console.error('[GEO] getCurrentPosition failed:', err.code, err.message);
         setGeoError('Unable to retrieve your location');
         setGeoLoading(false);
-      }
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
     );
   };
 
@@ -208,13 +209,13 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
         {locationFromPhoto && (
           <div className="location-detected-banner">
             {photoSource === 'camera'
-              ? '📍 Location set from your device — move the pin to adjust if needed'
-              : '📍 Location detected from photo — tap Confirm or move the pin to adjust'}
+              ? '✓ Location set from your device — move the pin to adjust if needed'
+              : '✓ Location detected from photo — move the pin to adjust if needed'}
           </div>
         )}
 
-        <div className="map-picker-map-area">
-          {/* Search overlay — floats above the Leaflet map */}
+        {/* Location tools: search + use my location grouped together above the map */}
+        <div className="map-location-tools">
           <div className="map-search">
             <div className="map-search-input-wrapper">
               <span className="map-search-icon">🔍</span>
@@ -243,7 +244,17 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
               </ul>
             )}
           </div>
+          <button
+            onClick={handleUseMyLocation}
+            className="map-use-location-btn"
+            disabled={loading || geoLoading}
+          >
+            {geoLoading ? <><ThemedLoader variant="dots" />Getting location…</> : '📍 Use my location'}
+          </button>
+          {geoError && <p className="geo-error">{geoError}</p>}
+        </div>
 
+        <div className="map-picker-map-area">
           <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -269,13 +280,6 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
             ← Back
           </button>
           <button
-            onClick={handleUseMyLocation}
-            className="btn btn-secondary"
-            disabled={loading || geoLoading}
-          >
-            {geoLoading ? <><ThemedLoader variant="dots" />Locating…</> : '📍 Use my location'}
-          </button>
-          <button
             onClick={() => coordinates && onConfirm(coordinates)}
             className="btn btn-primary"
             disabled={!coordinates || loading}
@@ -283,7 +287,6 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
             {loading ? <><ThemedLoader variant="dots" />Creating…</> : '✓ Confirm Location'}
           </button>
         </div>
-        {geoError && <p className="geo-error">{geoError}</p>}
       </div>
     </div>
   );

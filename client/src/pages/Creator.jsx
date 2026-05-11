@@ -122,7 +122,7 @@ function Creator() {
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => setCameraLocation({ lat: coords.latitude, lng: coords.longitude }),
         () => setCameraLocation(null),
-        { timeout: 10000, maximumAge: 60000 }
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
       );
     }
 
