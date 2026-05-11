@@ -89,7 +89,7 @@ function Creator() {
     setOriginalFile(file);
     setPhotoSource('upload');
     setError('');
-    setSizeWarning(sizeMB > 8 ? `Large file (${sizeMB.toFixed(1)} MB) — will compress before uploading` : '');
+    setSizeWarning(sizeMB > 15 ? `Large file (${sizeMB.toFixed(1)} MB) — will resize before uploading` : '');
 
     // Navigate to map — MapPicker handles EXIF reading with the raw file
     setStep('map');
@@ -97,7 +97,9 @@ function Creator() {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 4096 }, height: { ideal: 2160 } }
+      });
       videoRef.current.srcObject = stream;
       document.querySelector('.creator-photo-section').style.display = 'none';
       document.querySelector('.camera-view').style.display = 'block';
@@ -136,7 +138,7 @@ function Creator() {
       document.querySelector('.creator-photo-section').style.display = 'block';
       document.querySelector('.camera-view').style.display = 'none';
       setStep('map');
-    }, 'image/jpeg');
+    }, 'image/jpeg', 0.95);
   };
 
   const handleMapConfirm = async (coordinates, winRadius = 50) => {
@@ -148,7 +150,10 @@ function Creator() {
     setError('');
 
     try {
-      const blob = await resizeImage(originalFileRef.current, 1200);
+      const source = originalFileRef.current;
+      const blob = source.size > 15 * 1024 * 1024
+        ? await resizeImage(source, 4096)
+        : source;
       setSizeWarning('');
 
       const formData = new FormData();
