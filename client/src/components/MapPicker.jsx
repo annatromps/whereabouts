@@ -27,6 +27,16 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
+const CrosshairIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <circle cx="12" cy="12" r="4"/>
+    <line x1="12" y1="2" x2="12" y2="8"/>
+    <line x1="12" y1="16" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="8" y2="12"/>
+    <line x1="16" y1="12" x2="22" y2="12"/>
+  </svg>
+);
+
 function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
@@ -266,7 +276,6 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
           </div>
         )}
 
-        {/* Location tools: search + use my location grouped together above the map */}
         <div className="map-location-tools">
           <div className="map-search">
             <div className="map-search-input-wrapper">
@@ -281,6 +290,14 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
                 onBlur={() => setTimeout(() => setShowResults(false), 150)}
               />
               {searchLoading && <span className="tl-search-spin" aria-label="Searching" />}
+              <button
+                className="map-location-icon-btn"
+                onClick={handleUseMyLocation}
+                disabled={loading || geoLoading}
+                aria-label="Use my location"
+              >
+                {geoLoading ? <span className="tl-search-spin" /> : <CrosshairIcon />}
+              </button>
             </div>
             {showResults && searchResults.length > 0 && (
               <ul className="map-search-results">
@@ -296,13 +313,6 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
               </ul>
             )}
           </div>
-          <button
-            onClick={handleUseMyLocation}
-            className="map-use-location-btn"
-            disabled={loading || geoLoading}
-          >
-            {geoLoading ? <><ThemedLoader variant="dots" />Getting location…</> : '📍 Use my location'}
-          </button>
           {geoError && <p className="geo-error">{geoError}</p>}
         </div>
 

@@ -6,6 +6,16 @@ import '../styles/GuesserMap.css';
 const isValidPos = (pos) =>
   Array.isArray(pos) && Number.isFinite(pos[0]) && Number.isFinite(pos[1]);
 
+const CrosshairIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <circle cx="12" cy="12" r="4"/>
+    <line x1="12" y1="2" x2="12" y2="8"/>
+    <line x1="12" y1="16" x2="12" y2="22"/>
+    <line x1="2" y1="12" x2="8" y2="12"/>
+    <line x1="16" y1="12" x2="22" y2="12"/>
+  </svg>
+);
+
 // Active (not-yet-submitted) pin — red teardrop
 const activePinIcon = L.icon({
   iconUrl: 'data:image/svg+xml;base64,' + btoa(
@@ -60,6 +70,7 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
   const [searchLoading, setSearchLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [flyTarget, setFlyTarget] = useState(null);
+  const [geoLoading, setGeoLoading] = useState(false);
 
   // Debounced Nominatim search
   useEffect(() => {
@@ -86,6 +97,19 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const handlePanToMyLocation = () => {
+    if (!navigator.geolocation) return;
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setFlyTarget([coords.latitude, coords.longitude]);
+        setGeoLoading(false);
+      },
+      () => setGeoLoading(false),
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  };
 
   const handleSelectResult = (result) => {
     const lat = parseFloat(result.lat);
@@ -114,6 +138,14 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
             onBlur={() => setTimeout(() => setShowResults(false), 150)}
           />
           {searchLoading && <span className="tl-search-spin" aria-label="Searching" />}
+          <button
+            className="guesser-location-icon-btn"
+            onClick={handlePanToMyLocation}
+            disabled={geoLoading}
+            aria-label="Pan to my location"
+          >
+            {geoLoading ? <span className="tl-search-spin" /> : <CrosshairIcon />}
+          </button>
         </div>
         {showResults && searchResults.length > 0 && (
           <ul className="guesser-search-results">

@@ -25,9 +25,41 @@
   gap: 8px;
   background: white;
   border-radius: 24px;
-  padding: 0 14px;
+  padding: 0 5px 0 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   height: 44px;
+}
+
+.guesser-location-icon-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.guesser-location-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+.guesser-location-icon-btn:active {
+  background: rgba(228, 73, 71, 0.12);
+  color: #E44947;
+}
+
+.guesser-location-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .guesser-search-icon {
