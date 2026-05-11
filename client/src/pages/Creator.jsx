@@ -118,12 +118,21 @@ function Creator() {
     // The result (or null on failure) is passed to MapPicker so the pin
     // is pre-placed as soon as — or before — the map view opens.
     setCameraLocation(null);
+    console.log('[GEO] Requesting location at capture time. geolocation available:', !!navigator.geolocation);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        ({ coords }) => setCameraLocation({ lat: coords.latitude, lng: coords.longitude }),
-        () => setCameraLocation(null),
+        ({ coords }) => {
+          console.log('[GEO] Success — lat:', coords.latitude, 'lng:', coords.longitude);
+          setCameraLocation({ lat: coords.latitude, lng: coords.longitude });
+        },
+        (err) => {
+          console.warn('[GEO] Failed — code:', err.code, 'message:', err.message);
+          setCameraLocation(null);
+        },
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
       );
+    } else {
+      console.warn('[GEO] navigator.geolocation not available');
     }
 
     canvas.toBlob((blob) => {

@@ -82,9 +82,11 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
   // cameraLocation arrives as a prop (resolved in Creator at capture time) so
   // the pin appears as soon as — or before — the map finishes opening.
   useEffect(() => {
+    console.log('[MapPicker] cameraLocation effect — cameraLocation:', cameraLocation, '| photoSource:', photoSource, '| manualPin:', manualPinRef.current);
     if (!cameraLocation || photoSource !== 'camera') return;
     if (manualPinRef.current) return;
     const pos = [cameraLocation.lat, cameraLocation.lng];
+    console.log('[MapPicker] Placing pin at', pos);
     setMarkerPos(pos);
     setCoordinates({ lat: pos[0], lng: pos[1] });
     setFlyTarget(pos);
