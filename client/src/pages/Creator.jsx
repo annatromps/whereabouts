@@ -53,6 +53,7 @@ function Creator() {
   const [sizeWarning, setSizeWarning] = useState('');
   const [originalFile, setOriginalFile] = useState(null); // passed to MapPicker for EXIF + upload
   const [photoSource, setPhotoSource] = useState('upload'); // 'upload' | 'camera'
+  const [cameraLocation, setCameraLocation] = useState(null); // pre-fetched geo from startCamera
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -100,6 +101,16 @@ function Creator() {
       videoRef.current.srcObject = stream;
       document.querySelector('.creator-photo-section').style.display = 'none';
       document.querySelector('.camera-view').style.display = 'block';
+
+      // Start geo immediately so it has the full time the user spends framing/shooting to resolve.
+      setCameraLocation(null);
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          ({ coords }) => setCameraLocation({ lat: coords.latitude, lng: coords.longitude }),
+          () => { /* silent — MapPicker will retry on mount */ },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+        );
+      }
     } catch {
       setError('Camera access denied');
     }
@@ -235,9 +246,10 @@ function Creator() {
           <MapPicker
             file={originalFile}
             photoSource={photoSource}
+            cameraLocation={photoSource === 'camera' ? cameraLocation : null}
             onConfirm={handleMapConfirm}
             loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); }}
+            onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); setCameraLocation(null); }}
           />
         </div>
       )}

@@ -27,7 +27,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack }) {
+function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -78,10 +78,21 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // For camera captures, auto-request geolocation after a short delay to let
-  // mobile browsers settle after the camera/photo transition.
+  // If Creator resolved geo before the map opened, place the pin immediately.
+  useEffect(() => {
+    if (!cameraLocation || photoSource !== 'camera') return;
+    if (manualPinRef.current) return;
+    const pos = [cameraLocation.lat, cameraLocation.lng];
+    setMarkerPos(pos);
+    setCoordinates({ lat: pos[0], lng: pos[1] });
+    setFlyTarget(pos);
+    setLocationFromPhoto(true);
+  }, [cameraLocation, photoSource]);
+
+  // Fallback: if Creator's early geo request hasn't resolved yet, try from here.
   useEffect(() => {
     if (photoSource !== 'camera') return;
+    if (cameraLocation) return; // already handled by prop-watching effect above
     if (!navigator.geolocation) {
       setGeoError('Location not available on this device');
       return;
@@ -110,7 +121,7 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
             : 'Couldn\'t detect location automatically — tap \'Use my location\' or drop a pin manually';
           setGeoError(msg);
         },
-        { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
       );
     }, 400);
     return () => { cancelled = true; clearTimeout(timer); };
@@ -204,7 +215,7 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
         setGeoError('Unable to retrieve your location');
         setGeoLoading(false);
       },
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
     );
   };
 
