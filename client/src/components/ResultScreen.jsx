@@ -48,16 +48,16 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
   };
 
   const handleShare = async () => {
-    const gameUrl = (shareUrl || `${window.location.origin}/game/${gameId}`).replace(/^https?:\/\//, '');
+    const displayUrl = shareUrl || `${window.location.hostname}/game/${gameId}`;
     const summary = buildSummary();
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Whereabouts', text: summary, url: gameUrl });
+        await navigator.share({ title: 'Whereabouts', text: summary, url: `https://${displayUrl}` });
       } catch { /* user cancelled */ }
     } else {
       try {
-        await navigator.clipboard.writeText(`${summary}\n${gameUrl}`);
+        await navigator.clipboard.writeText(`${summary}\n${displayUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
       } catch { /* unavailable */ }

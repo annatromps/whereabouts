@@ -7,10 +7,10 @@ function ShareModal({ gameData, onBackToMap }) {
   const [shareCopied, setShareCopied] = useState(false);
   const { user } = useAuth();
 
-  const displayUrl = gameData.shareUrl.replace(/^https?:\/\//, '');
+  const shareUrl = gameData.shareUrl;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(displayUrl);
+    navigator.clipboard.writeText(shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -23,11 +23,11 @@ function ShareModal({ gameData, onBackToMap }) {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Whereabouts', text: shareText, url: displayUrl });
+        await navigator.share({ title: 'Whereabouts', text: shareText, url: `https://${shareUrl}` });
       } catch { /* user cancelled */ }
     } else {
       try {
-        await navigator.clipboard.writeText(`${shareText}\n${displayUrl}`);
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
         setShareCopied(true);
         setTimeout(() => setShareCopied(false), 2500);
       } catch { /* unavailable */ }
@@ -47,7 +47,7 @@ function ShareModal({ gameData, onBackToMap }) {
         <div className="share-section">
           <p className="share-link-label">Or copy the link manually</p>
           <div className="share-link-box">
-            <input type="text" value={displayUrl} readOnly />
+            <input type="text" value={shareUrl} readOnly />
             <button onClick={handleCopyLink} className="btn btn-ghost share-copy-btn">
               {copied ? '✓' : '📋'}
             </button>
