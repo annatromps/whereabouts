@@ -78,7 +78,8 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // For camera captures, auto-request geolocation as soon as the map opens.
+  // For camera captures, auto-request geolocation after a short delay to let
+  // mobile browsers settle after the camera/photo transition.
   useEffect(() => {
     if (photoSource !== 'camera') return;
     if (!navigator.geolocation) {
@@ -86,25 +87,33 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
       return;
     }
     setGeoLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setGeoLoading(false);
-        if (manualPinRef.current) return;
-        const pos = [coords.latitude, coords.longitude];
-        setMarkerPos(pos);
-        setCoordinates({ lat: pos[0], lng: pos[1] });
-        setFlyTarget(pos);
-        setLocationFromPhoto(true);
-      },
-      (err) => {
-        setGeoLoading(false);
-        const msg = err.code === 1
-          ? 'Location permission denied — tap \'Use my location\' or drop a pin manually'
-          : 'Couldn\'t detect location automatically — tap \'Use my location\' or drop a pin manually';
-        setGeoError(msg);
-      },
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-    );
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          if (cancelled) return;
+          setGeoLoading(false);
+          if (manualPinRef.current) return;
+          const pos = [coords.latitude, coords.longitude];
+          setMarkerPos(pos);
+          setCoordinates({ lat: pos[0], lng: pos[1] });
+          setFlyTarget(pos);
+          setLocationFromPhoto(true);
+        },
+        (err) => {
+          if (cancelled) return;
+          console.error('[GEO] Auto — code:', err.code, 'message:', err.message, 'full:', err);
+          setGeoLoading(false);
+          const msg = err.code === 1
+            ? 'Location permission denied — tap \'Use my location\' or drop a pin manually'
+            : 'Couldn\'t detect location automatically — tap \'Use my location\' or drop a pin manually';
+          setGeoError(msg);
+        },
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
+      );
+    }, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [photoSource]);
 
   // Read GPS from the raw file as soon as MapPicker mounts with it.
@@ -191,11 +200,11 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
         setGeoLoading(false);
       },
       (err) => {
-        console.error('[GEO] getCurrentPosition failed:', err.code, err.message);
+        console.error('[GEO] Manual — code:', err.code, 'message:', err.message, 'full:', err);
         setGeoError('Unable to retrieve your location');
         setGeoLoading(false);
       },
-      { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 0 }
     );
   };
 
