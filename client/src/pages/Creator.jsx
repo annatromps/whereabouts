@@ -158,10 +158,15 @@ function Creator() {
       formData.append('lat', coordinates.lat);
       formData.append('lng', coordinates.lng);
 
-      console.log('[Creator] POST /api/games', {
+      console.log('[Creator] POST /api/games payload:', {
         blobSize: blob.size,
+        blobType: blob.type,
         lat: coordinates.lat,
-        lng: coordinates.lng
+        lng: coordinates.lng,
+        latType: typeof coordinates.lat,
+        lngType: typeof coordinates.lng,
+        latValid: Number.isFinite(coordinates.lat),
+        lngValid: Number.isFinite(coordinates.lng),
       });
 
       const token = getToken();
@@ -193,10 +198,11 @@ function Creator() {
       });
       setStep('share');
     } catch (err) {
-      console.error('[Creator] Upload failed:', err);
-      setError(err.message.startsWith('Server error') || err.message.startsWith('Failed')
-        ? err.message
-        : 'Upload failed: ' + err.message);
+      const isNetworkError = err instanceof TypeError && err.message === 'Failed to fetch';
+      console.error('[Creator] Upload failed — type:', err.constructor.name, '| message:', err.message, '| isNetworkError:', isNetworkError);
+      setError(isNetworkError
+        ? 'Could not reach the server — check your connection and try again'
+        : err.message.startsWith('Server error') ? err.message : 'Upload failed: ' + err.message);
     } finally {
       setLoading(false);
     }

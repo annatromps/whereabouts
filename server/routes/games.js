@@ -23,15 +23,16 @@ const upload = multer({
 
 // POST /api/games — Create a new game
 router.post('/', upload.single('photo'), (req, res) => {
-  console.log('[games] POST /api/games hit — file:', req.file ? `${req.file.size} bytes, ${req.file.mimetype}` : 'MISSING', '| body keys:', Object.keys(req.body));
+  const { lat, lng } = req.body;
+  console.log('[games] POST /api/games — file:', req.file ? `${req.file.size} bytes, ${req.file.mimetype}` : 'MISSING', '| lat:', lat, '| lng:', lng, '| lat type:', typeof lat);
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No photo provided' });
     }
 
-    const { lat, lng } = req.body;
     const answerLat = parseFloat(lat);
     const answerLng = parseFloat(lng);
+    console.log('[games] Parsed coords — answerLat:', answerLat, '| answerLng:', answerLng, '| isNaN:', isNaN(answerLat) || isNaN(answerLng));
 
     if (isNaN(answerLat) || isNaN(answerLng)) {
       return res.status(400).json({ error: 'Invalid coordinates' });

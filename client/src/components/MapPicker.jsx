@@ -165,14 +165,17 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
     setGeoError('');
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        console.log('[GEO] getCurrentPosition success:', coords.latitude, coords.longitude);
         const pos = [coords.latitude, coords.longitude];
         manualPinRef.current = true;
         placePin(pos);
+        console.log('[GEO] coordinates stored in state:', { lat: pos[0], lng: pos[1] });
         setFlyTarget(pos);
         setLocationFromPhoto(false);
         setGeoLoading(false);
       },
-      () => {
+      (err) => {
+        console.error('[GEO] getCurrentPosition failed:', err.code, err.message);
         setGeoError('Unable to retrieve your location');
         setGeoLoading(false);
       }
