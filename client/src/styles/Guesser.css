@@ -181,7 +181,7 @@
 
 .guesser-feedback-pill {
   position: absolute;
-  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(160px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 900;
@@ -221,21 +221,33 @@
   z-index: 900;
   padding: 16px 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, transparent 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45) 0%, transparent 100%);
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+/* Plain instruction label — no button appearance */
+.guesser-map-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
   pointer-events: none;
 }
 
 .guesser-view-photo-btn {
-  flex-shrink: 0;
-  padding: 16px 18px;
+  width: 100%;
+  padding: 18px 24px;
   background: rgba(255, 255, 255, 0.93);
   color: #1a1a18;
   border: none;
   border-radius: 16px;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   -webkit-tap-highlight-color: transparent;
@@ -253,13 +265,13 @@
 }
 
 .guesser-submit-btn {
-  flex: 1;
-  padding: 16px 20px;
+  width: 100%;
+  padding: 18px 24px;
   background: #E44947;
   color: white;
   border: none;
   border-radius: 16px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -270,19 +282,12 @@
   pointer-events: auto;
 }
 
-.guesser-submit-btn:disabled {
-  background: rgba(255, 255, 255, 0.88);
-  color: #6b7280;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
-  cursor: default;
-}
-
-.guesser-submit-btn:not(:disabled):hover {
+.guesser-submit-btn:hover {
   background: #d63f3d;
   box-shadow: 0 6px 24px rgba(228, 73, 71, 0.55);
 }
 
-.guesser-submit-btn:not(:disabled):active {
+.guesser-submit-btn:active {
   background: #c43937;
 }
 

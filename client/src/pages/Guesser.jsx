@@ -189,19 +189,20 @@ function Guesser() {
       )}
 
       <div className="guesser-map-bottom-bar">
+        {isValidPos(markerPos) && (
+          <button
+            className="guesser-submit-btn"
+            onClick={handleSubmitGuess}
+            disabled={guessing}
+          >
+            {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Submit guess'}
+          </button>
+        )}
+        {!isValidPos(markerPos) && !guessing && (
+          <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
+        )}
         <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
           📷 View photo
-        </button>
-        <button
-          className="guesser-submit-btn"
-          onClick={handleSubmitGuess}
-          disabled={!isValidPos(markerPos) || guessing}
-        >
-          {guessing
-            ? <><ThemedLoader variant="dots" />Submitting…</>
-            : isValidPos(markerPos)
-              ? '🎯 Submit guess'
-              : '📍 Tap map to place pin'}
         </button>
       </div>
     </div>
