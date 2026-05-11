@@ -52,6 +52,7 @@ function Creator() {
   const [error, setError] = useState('');
   const [sizeWarning, setSizeWarning] = useState('');
   const [originalFile, setOriginalFile] = useState(null); // passed to MapPicker for EXIF + upload
+  const [photoSource, setPhotoSource] = useState('upload'); // 'upload' | 'camera'
 
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
@@ -85,6 +86,7 @@ function Creator() {
 
     setPhoto(previewUrl);
     setOriginalFile(file);
+    setPhotoSource('upload');
     setError('');
     setSizeWarning(sizeMB > 8 ? `Large file (${sizeMB.toFixed(1)} MB) — will compress before uploading` : '');
 
@@ -117,6 +119,7 @@ function Creator() {
       previewUrlRef.current = url;
       originalFileRef.current = blob;
       setOriginalFile(blob);
+      setPhotoSource('camera');
       setPhoto(url);
       setSizeWarning('');
       document.querySelector('.creator-photo-section').style.display = 'block';
@@ -228,6 +231,7 @@ function Creator() {
           {error && <div className="error-banner">⚠️ {error}</div>}
           <MapPicker
             file={originalFile}
+            photoSource={photoSource}
             onConfirm={handleMapConfirm}
             loading={loading}
             onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); }}

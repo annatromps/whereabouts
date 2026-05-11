@@ -27,7 +27,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-function MapPicker({ file, onConfirm, loading, onBack }) {
+function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
   const [flyTarget, setFlyTarget] = useState(null);
@@ -79,8 +79,9 @@ function MapPicker({ file, onConfirm, loading, onBack }) {
   }, [searchQuery]);
 
   // Read GPS from the raw file as soon as MapPicker mounts with it.
+  // Camera captures never carry EXIF GPS, so skip entirely for them.
   useEffect(() => {
-    if (!file) return;
+    if (!file || photoSource === 'camera') return;
     let cancelled = false;
     setExifStatus('reading');
     console.log('[EXIF] Reading file:', file.name ?? '(blob)', file.type, file.size + ' bytes');
@@ -112,7 +113,7 @@ function MapPicker({ file, onConfirm, loading, onBack }) {
       });
 
     return () => { cancelled = true; };
-  }, [file]);
+  }, [file, photoSource]);
 
   // Place a pin programmatically (EXIF / geolocation / search)
   const placePin = (pos) => {
@@ -178,12 +179,12 @@ function MapPicker({ file, onConfirm, loading, onBack }) {
             🔍 Reading location data…
           </div>
         )}
-        {exifStatus === 'not-found' && (
+        {photoSource === 'upload' && exifStatus === 'not-found' && (
           <div className="exif-status exif-status--none">
             ℹ️ No location data in this photo
           </div>
         )}
-        {exifStatus === 'error' && (
+        {photoSource === 'upload' && exifStatus === 'error' && (
           <div className="exif-status exif-status--error">
             ⚠️ Couldn't read location data from this photo
           </div>
