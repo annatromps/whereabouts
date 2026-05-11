@@ -50,24 +50,18 @@
 
 /* ── CTA button ── */
 
-.button-group {
-  display: flex;
-  flex-direction: column;
+.home-content .button-group {
   align-items: flex-start;
   gap: 8px;
 }
 
-.btn-primary {
+.home-content .btn-primary {
   padding: 13px 36px;
-  font-size: 1rem;
-  background-color: #E44947;
-  color: white;
   font-weight: 600;
   box-shadow: 0 6px 20px rgba(228, 73, 71, 0.32);
 }
 
-.btn-primary:hover {
-  background-color: #cc3b39;
+.home-content .btn-primary:hover {
   transform: translateY(-2px);
 }
 

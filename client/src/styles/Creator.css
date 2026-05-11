@@ -31,54 +31,8 @@
   color: #6b7280;
 }
 
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.creator-photo-section .button-group {
   width: 100%;
-}
-
-.btn {
-  padding: 13px 24px;
-  font-size: 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-weight: 500;
-  min-height: 44px;
-}
-
-.btn-primary {
-  background-color: #E44947;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #cc3b39;
-}
-
-.btn-secondary {
-  background-color: white;
-  color: #1f2937;
-}
-
-.btn-secondary:hover {
-  background-color: #f3f4f6;
-}
-
-.btn-ghost {
-  background-color: transparent;
-  color: #E44947;
-  border: 2px solid #E44947;
-}
-
-.btn-ghost:hover {
-  background-color: #fff5f5;
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .camera-view {
