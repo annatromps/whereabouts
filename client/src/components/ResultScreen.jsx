@@ -53,7 +53,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Whereabouts', text: summary, url: `https://${displayUrl}` });
+        await navigator.share({ title: 'Whereabouts', text: `${summary}\n${displayUrl}` });
       } catch { /* user cancelled */ }
     } else {
       try {

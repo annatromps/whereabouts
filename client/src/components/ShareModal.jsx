@@ -23,7 +23,7 @@ function ShareModal({ gameData, onBackToMap }) {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Whereabouts', text: shareText, url: `https://${shareUrl}` });
+        await navigator.share({ title: 'Whereabouts', text: `${shareText}\n${shareUrl}` });
       } catch { /* user cancelled */ }
     } else {
       try {
