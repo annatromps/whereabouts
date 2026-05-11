@@ -78,6 +78,30 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // For camera captures: request device geolocation and pre-fill the pin.
+  useEffect(() => {
+    if (!file || photoSource !== 'camera') return;
+    if (!navigator.geolocation) return;
+
+    setExifStatus('reading');
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setExifStatus('found');
+        if (!manualPinRef.current) {
+          const pos = [coords.latitude, coords.longitude];
+          setMarkerPos(pos);
+          setCoordinates({ lat: pos[0], lng: pos[1] });
+          setFlyTarget(pos);
+          setLocationFromPhoto(true);
+        }
+      },
+      () => {
+        setExifStatus(null); // denied or unavailable — silent fallback
+      },
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  }, [file, photoSource]);
+
   // Read GPS from the raw file as soon as MapPicker mounts with it.
   // Camera captures never carry EXIF GPS, so skip entirely for them.
   useEffect(() => {
@@ -176,7 +200,7 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
 
         {exifStatus === 'reading' && (
           <div className="exif-status exif-status--reading">
-            🔍 Reading location data…
+            {photoSource === 'camera' ? '📍 Getting your location…' : '🔍 Reading location data…'}
           </div>
         )}
         {photoSource === 'upload' && exifStatus === 'not-found' && (
@@ -191,7 +215,9 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
         )}
         {locationFromPhoto && (
           <div className="location-detected-banner">
-            📍 Location detected from photo — tap Confirm or move the pin to adjust
+            {photoSource === 'camera'
+              ? '📍 Location set from your device — move the pin to adjust if needed'
+              : '📍 Location detected from photo — tap Confirm or move the pin to adjust'}
           </div>
         )}
 
