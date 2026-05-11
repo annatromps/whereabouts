@@ -61,7 +61,9 @@ router.post('/', upload.single('photo'), (req, res) => {
           console.error('[games] DB insert error:', err);
           return res.status(500).json({ error: 'Failed to save game to database' });
         }
-        const base = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+        const base = process.env.BASE_URL
+          ? process.env.BASE_URL.replace(/\/$/, '')
+          : `${req.protocol}://${req.get('host')}`;
         const shareUrl = `${base}/game/${gameId}`;
         console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (photo ${req.file.size} bytes) shareUrl: ${shareUrl}`);
         res.json({ gameId, creatorName: creatorUsername, shareUrl });
@@ -91,7 +93,9 @@ router.get('/:gameId', (req, res) => {
       ? row.photo_path
       : `/uploads/${row.photo_path}`;
 
-    const base = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const base = process.env.BASE_URL
+      ? process.env.BASE_URL.replace(/\/$/, '')
+      : `${req.protocol}://${req.get('host')}`;
     const shareUrl = `${base}/game/${gameId}`;
     res.json({ gameId, photoUrl, creatorName: row.creator_username || null, shareUrl });
   });
