@@ -38,6 +38,9 @@ router.post('/', upload.single('photo'), (req, res) => {
       return res.status(400).json({ error: 'Invalid coordinates' });
     }
 
+    const winRadiusRaw = parseInt(req.body.win_radius_km);
+    const winRadius = Number.isFinite(winRadiusRaw) ? Math.min(500, Math.max(10, winRadiusRaw)) : 50;
+
     // Optional auth — attach creator username if a valid JWT is present
     let creatorUsername = null;
     const authHeader = req.headers.authorization || '';
@@ -54,8 +57,8 @@ router.post('/', upload.single('photo'), (req, res) => {
     const db = getDb();
 
     db.run(
-      'INSERT INTO games (id, photo_path, answer_lat, answer_lng, creator_username) VALUES (?, ?, ?, ?, ?)',
-      [gameId, photoData, answerLat, answerLng, creatorUsername],
+      'INSERT INTO games (id, photo_path, answer_lat, answer_lng, creator_username, win_radius_km) VALUES (?, ?, ?, ?, ?, ?)',
+      [gameId, photoData, answerLat, answerLng, creatorUsername, winRadius],
       (err) => {
         if (err) {
           console.error('[games] DB insert error:', err);
@@ -97,7 +100,7 @@ router.get('/:gameId', (req, res) => {
       ? process.env.BASE_URL.replace(/\/$/, '')
       : `${req.protocol}://${req.get('host')}`;
     const shareUrl = `${base}/game/${gameId}`;
-    res.json({ gameId, photoUrl, creatorName: row.creator_username || null, shareUrl });
+    res.json({ gameId, photoUrl, creatorName: row.creator_username || null, shareUrl, winRadius: row.win_radius_km || 50 });
   });
 });
 
@@ -122,7 +125,7 @@ router.post('/:gameId/guess', (req, res) => {
     const distance = calculateDistance(guessLat, guessLng, game.answer_lat, game.answer_lng);
     const direction = getDirection(guessLat, guessLng, game.answer_lat, game.answer_lng);
     const { label, color } = getTemperature(distance);
-    const correct = distance <= 50;
+    const correct = distance <= (game.win_radius_km || 50);
 
     db.run(
       'INSERT INTO guesses (game_id, lat, lng, distance_km) VALUES (?, ?, ?, ?)',

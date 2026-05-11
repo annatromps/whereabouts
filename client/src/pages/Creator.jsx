@@ -139,7 +139,7 @@ function Creator() {
     }, 'image/jpeg');
   };
 
-  const handleMapConfirm = async (coordinates) => {
+  const handleMapConfirm = async (coordinates, winRadius = 50) => {
     if (!originalFileRef.current) {
       setError('No photo to upload — please go back and select one');
       return;
@@ -155,6 +155,7 @@ function Creator() {
       formData.append('photo', blob, 'photo.jpg');
       formData.append('lat', coordinates.lat);
       formData.append('lng', coordinates.lng);
+      formData.append('win_radius_km', winRadius);
 
       console.log('[Creator] POST /api/games payload:', {
         blobSize: blob.size,

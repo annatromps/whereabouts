@@ -30,6 +30,7 @@ function MapClickHandler({ onMapClick }) {
 function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConfirm, loading, onBack }) {
   const [coordinates, setCoordinates] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
+  const [winRadius, setWinRadius] = useState(50);
   const [flyTarget, setFlyTarget] = useState(null);
   const [locationFromPhoto, setLocationFromPhoto] = useState(false);
   const [exifStatus, setExifStatus] = useState(null); // null|'reading'|'found'|'not-found'|'error'
@@ -312,12 +313,28 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
           </MapContainer>
         </div>
 
+        <div className="map-radius-control">
+          <div className="map-radius-header">
+            <span className="map-radius-label">Win radius</span>
+            <span className="map-radius-value">Within {winRadius} km</span>
+          </div>
+          <input
+            type="range"
+            className="map-radius-slider"
+            min="10"
+            max="500"
+            step="5"
+            value={winRadius}
+            onChange={e => setWinRadius(Number(e.target.value))}
+          />
+        </div>
+
         <div className="map-picker-controls">
           <button onClick={onBack} className="btn btn-ghost" disabled={loading}>
             ← Back
           </button>
           <button
-            onClick={() => coordinates && onConfirm(coordinates)}
+            onClick={() => coordinates && onConfirm(coordinates, winRadius)}
             className="btn btn-primary"
             disabled={!coordinates || loading}
           >

@@ -13,6 +13,7 @@ function Guesser() {
   const [photo, setPhoto] = useState(null);
   const [creatorName, setCreatorName] = useState(null);
   const [shareUrl, setShareUrl] = useState(null);
+  const [winRadius, setWinRadius] = useState(50);
   const [guesses, setGuesses] = useState([]);
   const [lastFeedback, setLastFeedback] = useState(null);
   const [markerPos, setMarkerPos] = useState(null);
@@ -41,6 +42,7 @@ function Guesser() {
         setPhoto(data.photoUrl);
         setCreatorName(data.creatorName || null);
         setShareUrl(data.shareUrl || null);
+        setWinRadius(data.winRadius || 50);
         setGameState('guessing');
       } catch (err) {
         if (err.name === 'AbortError') {
@@ -156,6 +158,7 @@ function Guesser() {
           >
             🗺️ Guess location
           </button>
+          <p className="guesser-win-hint">Get within {winRadius} km to win</p>
         </div>
       </div>
     );
@@ -200,6 +203,7 @@ function Guesser() {
         {!isValidPos(markerPos) && !guessing && (
           <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
         )}
+        <p className="guesser-win-hint">Get within {winRadius} km to win</p>
         <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
           📷 View photo
         </button>

@@ -47,6 +47,7 @@ function createTables() {
         photo_path TEXT NOT NULL,
         answer_lat REAL NOT NULL,
         answer_lng REAL NOT NULL,
+        win_radius_km INTEGER DEFAULT 50,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         expires_at DATETIME
       )
@@ -65,8 +66,9 @@ function createTables() {
       )
     `);
 
-    // Migration: add creator_username to existing games tables (silent if already present)
+    // Migrations — silent no-ops if column already exists
     db.run('ALTER TABLE games ADD COLUMN creator_username TEXT', () => {});
+    db.run('ALTER TABLE games ADD COLUMN win_radius_km INTEGER DEFAULT 50', () => {});
 
     console.log('✅ Database tables initialized');
   });

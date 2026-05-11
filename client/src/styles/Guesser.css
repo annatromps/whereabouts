@@ -189,6 +189,16 @@
   pointer-events: none;
 }
 
+/* Subtle win-radius hint — shown on both photo and map views */
+.guesser-win-hint {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
 /* Plain instruction label — no button appearance */
 .guesser-map-hint {
   margin: 0;
