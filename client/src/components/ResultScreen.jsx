@@ -48,7 +48,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
   };
 
   const handleShare = async () => {
-    const gameUrl = shareUrl || `${window.location.origin}/game/${gameId}`;
+    const gameUrl = (shareUrl || `${window.location.origin}/game/${gameId}`).replace(/^https?:\/\//, '');
     const summary = buildSummary();
 
     if (navigator.share) {
