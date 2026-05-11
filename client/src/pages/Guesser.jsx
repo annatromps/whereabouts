@@ -17,9 +17,8 @@ function Guesser() {
   const [markerPos, setMarkerPos] = useState(null);
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
-  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const [mapOpen, setMapOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,10 +74,7 @@ function Guesser() {
       if (feedback.correct) {
         setGameState('won');
       } else {
-        // Reset pin so the user places a fresh one for the next guess.
-        // Collapse the map so the feedback in the handle is visible.
         setMarkerPos(null);
-        setMapOpen(false);
       }
     } catch (err) {
       setError('Failed to submit guess: ' + err.message);
@@ -86,9 +82,6 @@ function Guesser() {
       setGuessing(false);
     }
   };
-
-  // Handle always just toggles the map — no auto-submit on tap
-  const handlePanelTap = () => setMapOpen(o => !o);
 
   if (gameState === 'error') {
     return (
@@ -125,85 +118,55 @@ function Guesser() {
     <div className="guesser-container">
       <WelcomeOverlay />
 
-      {/* Photo area — shrinks when map is open */}
-      <div
-        className={`guesser-photo-area${mapOpen ? ' guesser-photo-area--shrunk' : ''}`}
-        onClick={() => setLightboxOpen(true)}
-      >
-        <div className="guesser-photo-frame">
-          {photo && <img src={photo} alt="Guess this location" />}
-          {/* Decorative corner brackets */}
-          <span className="photo-corner photo-corner--tl" />
-          <span className="photo-corner photo-corner--tr" />
-          <span className="photo-corner photo-corner--bl" />
-          <span className="photo-corner photo-corner--br" />
-          <div className="guess-counter">Guess #{guesses.length + 1}</div>
-          <div className="photo-zoom-hint">🔍 Tap to zoom</div>
-        </div>
+      {/* Full-screen map */}
+      <div className="guesser-map-fullscreen">
+        <GuesserMap
+          markerPos={markerPos}
+          onMarkerChange={setMarkerPos}
+          isVisible={true}
+          pastGuesses={guesses}
+        />
       </div>
 
-      {lightboxOpen && (
-        <Lightbox src={photo} alt="Location photo" onClose={() => setLightboxOpen(false)} />
+      {/* Top-left: View Photo button */}
+      <button className="guesser-view-photo-btn" onClick={() => setPhotoOpen(true)}>
+        📷 View photo
+      </button>
+
+      {/* Top-right: Guess counter */}
+      <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
+
+      {/* Feedback pill — appears after each wrong guess, sits above submit bar */}
+      {lastFeedback && (
+        <div key={guesses.length} className="guesser-feedback-pill slideIn">
+          <span className="gfp-temp" style={{ color: lastFeedback.temperatureColor }}>
+            {lastFeedback.temperature}
+          </span>
+          <span className="gfp-sep" />
+          <span>📍 {lastFeedback.distance} km</span>
+          <span className="gfp-sep" />
+          <span>🧭 {lastFeedback.direction}</span>
+        </div>
       )}
 
-      {/* Collapsible map panel */}
-      <div className={`guesser-panel${mapOpen ? ' guesser-panel--open' : ''}`}>
-
-        {/*
-          Handle doubles as feedback display:
-          - Map open → "▼ Collapse map"
-          - Map closed, feedback exists → temperature · km · direction
-          - Map closed, no feedback → "📍 Place your guess on the map"
-          Tapping always toggles the map.
-        */}
-        <button className="guesser-panel-handle" onClick={handlePanelTap}>
-          <span className="panel-handle-bar" />
-          {mapOpen ? (
-            <span className="panel-handle-label">▼ Collapse map</span>
-          ) : lastFeedback ? (
-            <div key={guesses.length} className="panel-handle-feedback slideIn">
-              <span
-                className="phf-temp"
-                style={{ color: lastFeedback.temperatureColor }}
-              >
-                {lastFeedback.temperature}
-              </span>
-              <span className="phf-sep" />
-              <span className="phf-dist">📍 {lastFeedback.distance} km away</span>
-              <span className="phf-sep" />
-              <span className="phf-dir">🧭 {lastFeedback.direction}</span>
-              <span className="phf-hint">— tap to guess again</span>
-            </div>
-          ) : (
-            <span className="panel-handle-label">📍 Place your guess on the map</span>
-          )}
+      {/* Bottom: floating submit button */}
+      <div className="guesser-submit-bar">
+        <button
+          onClick={handleSubmitGuess}
+          className="guesser-submit-btn"
+          disabled={!isValidPos(markerPos) || guessing}
+        >
+          {guessing
+            ? <><ThemedLoader variant="dots" />Submitting…</>
+            : isValidPos(markerPos)
+              ? '🎯 Submit guess'
+              : '📍 Tap the map to place your pin'}
         </button>
-
-        <div className="guesser-panel-body">
-          <div className="guesser-map">
-            {/* isVisible triggers map.invalidateSize() after the CSS transition */}
-            <GuesserMap
-              markerPos={markerPos}
-              onMarkerChange={setMarkerPos}
-              isVisible={mapOpen}
-              pastGuesses={guesses}
-            />
-          </div>
-          <div className="guesser-footer">
-            <button
-              onClick={handleSubmitGuess}
-              className="btn btn-primary"
-              disabled={!isValidPos(markerPos) || guessing}
-            >
-              {guessing
-                ? <><ThemedLoader variant="dots" />Submitting…</>
-                : isValidPos(markerPos)
-                  ? '🎯 Guess this location'
-                  : '📍 Tap the map to place your pin'}
-            </button>
-          </div>
-        </div>
       </div>
+
+      {photoOpen && (
+        <Lightbox src={photo} alt="Location photo" onClose={() => setPhotoOpen(false)} />
+      )}
     </div>
   );
 }
