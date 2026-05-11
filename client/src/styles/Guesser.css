@@ -100,6 +100,35 @@
   border-radius: 0 0 3px 0;
 }
 
+/* 'i' button — top-left, reopens instructions */
+
+.guesser-info-btn {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  z-index: 900;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-style: italic;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+
+.guesser-info-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* Bottom action bar — photo screen */
 
 .guesser-bottom-bar {

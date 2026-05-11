@@ -18,6 +18,8 @@ function Guesser() {
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
+  const [instructionsSeen, setInstructionsSeen] = useState(false);
+  const [instructionsOpen, setInstructionsOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -117,9 +119,26 @@ function Guesser() {
   if (view === 'photo') {
     return (
       <div className="guesser-photo-screen">
-        <WelcomeOverlay />
+        {(!instructionsSeen || instructionsOpen) && (
+          <WelcomeOverlay
+            onDismiss={() => {
+              setInstructionsSeen(true);
+              setInstructionsOpen(false);
+            }}
+          />
+        )}
 
         <div className="guesser-guess-badge">Guess #{guesses.length + 1}</div>
+
+        {instructionsSeen && (
+          <button
+            className="guesser-info-btn"
+            onClick={() => setInstructionsOpen(true)}
+            aria-label="Show instructions"
+          >
+            i
+          </button>
+        )}
 
         <div className="guesser-photo-area">
           <div className="guesser-photo-frame">
@@ -132,7 +151,10 @@ function Guesser() {
         </div>
 
         <div className="guesser-bottom-bar">
-          <button className="guesser-primary-btn" onClick={() => setView('map')}>
+          <button
+            className="guesser-primary-btn"
+            onClick={() => { setInstructionsSeen(true); setView('map'); }}
+          >
             🗺️ Guess location
           </button>
         </div>

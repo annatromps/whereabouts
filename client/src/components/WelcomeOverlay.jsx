@@ -35,8 +35,8 @@ function WLogo() {
   );
 }
 
-function WelcomeOverlay() {
-  const [phase, setPhase] = useState('visible'); // always show on every visit
+function WelcomeOverlay({ onDismiss = () => {} }) {
+  const [phase, setPhase] = useState('visible');
 
   if (phase === 'gone') return null;
 
@@ -45,6 +45,7 @@ function WelcomeOverlay() {
   const handleAnimationEnd = (e) => {
     if (e.target === e.currentTarget && phase === 'hiding') {
       setPhase('gone');
+      onDismiss();
     }
   };
 
