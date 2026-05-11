@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
-import { gps as readExifGps } from 'exifr';
+import exifr from 'exifr';
 import ThemedLoader from './ThemedLoader';
 import '../styles/MapPicker.css';
 
@@ -128,18 +128,32 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
     return () => { cancelled = true; clearTimeout(timer); };
   }, [photoSource]);
 
-  // Read GPS from the raw file as soon as MapPicker mounts with it.
-  // Camera captures never carry EXIF GPS, so skip entirely for them.
+  // Read GPS from the raw file as soon as MapPicker mounts.
+  // This runs on the original File before any resizing/compression, which is
+  // the only time EXIF metadata is intact. Camera blobs never carry EXIF GPS.
   useEffect(() => {
     if (!file || photoSource === 'camera') return;
     let cancelled = false;
     setExifStatus('reading');
     console.log('[EXIF] Reading file:', file.name ?? '(blob)', file.type, file.size + ' bytes');
 
-    readExifGps(file)
-      .then(gps => {
+    const read = async () => {
+      try {
+        // Primary: exifr.gps() — fast GPS-only parse
+        let gps = await exifr.gps(file);
         if (cancelled) return;
         console.log('[EXIF] exifr.gps() returned:', gps);
+
+        // Fallback: full parse in case GPS sits in a non-standard IFD segment
+        if (!gps || !Number.isFinite(gps.latitude) || !Number.isFinite(gps.longitude)) {
+          const parsed = await exifr.parse(file, { gps: true });
+          if (cancelled) return;
+          console.log('[EXIF] exifr.parse() fallback returned:', parsed);
+          if (parsed?.latitude && parsed?.longitude) {
+            gps = { latitude: parsed.latitude, longitude: parsed.longitude };
+          }
+        }
+
         if (gps && Number.isFinite(gps.latitude) && Number.isFinite(gps.longitude)) {
           console.log('[EXIF] GPS found — lat:', gps.latitude, 'lng:', gps.longitude);
           setExifStatus('found');
@@ -151,17 +165,18 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
             setLocationFromPhoto(true);
           }
         } else {
-          console.log('[EXIF] No GPS data in this photo');
+          console.log('[EXIF] No GPS data found in this photo');
           setExifStatus('not-found');
         }
-      })
-      .catch(err => {
+      } catch (err) {
         if (!cancelled) {
           console.log('[EXIF] Error reading file:', err?.message);
           setExifStatus('error');
         }
-      });
+      }
+    };
 
+    read();
     return () => { cancelled = true; };
   }, [file, photoSource]);
 
@@ -235,19 +250,19 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
         )}
         {photoSource === 'upload' && exifStatus === 'not-found' && (
           <div className="exif-status exif-status--none">
-            ℹ️ No location data in this photo
+            ℹ️ No location in this photo — drop a pin or tap "Use my location"
           </div>
         )}
         {photoSource === 'upload' && exifStatus === 'error' && (
           <div className="exif-status exif-status--error">
-            ⚠️ Couldn't read location data from this photo
+            ⚠️ Couldn't read photo location — drop a pin or tap "Use my location"
           </div>
         )}
         {locationFromPhoto && (
           <div className="location-detected-banner">
             {photoSource === 'camera'
               ? '✓ Location set from your device — move the pin to adjust if needed'
-              : '✓ Location detected from photo — move the pin to adjust if needed'}
+              : '✓ Location found in photo — move the pin to adjust if needed'}
           </div>
         )}
 
