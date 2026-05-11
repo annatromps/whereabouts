@@ -58,12 +58,12 @@
 }
 
 .btn-secondary {
-  background-color: #FFCCD6;
-  color: #E44947;
+  background-color: white;
+  color: #1f2937;
 }
 
 .btn-secondary:hover {
-  background-color: #ffb3c1;
+  background-color: #f3f4f6;
 }
 
 .btn-ghost {

@@ -215,11 +215,11 @@ function Creator() {
           <h1>📸 Create a Game</h1>
           <p>Choose how you want to add a photo:</p>
           <div className="button-group">
-            <button onClick={() => fileInputRef.current.click()} className="btn btn-primary">
-              📤 Upload from Device
-            </button>
-            <button onClick={startCamera} className="btn btn-secondary">
+            <button onClick={startCamera} className="btn btn-primary">
               📷 Take a Photo
+            </button>
+            <button onClick={() => fileInputRef.current.click()} className="btn btn-secondary">
+              📤 Upload from Device
             </button>
           </div>
           <button onClick={() => navigate('/')} className="creator-back-link">
