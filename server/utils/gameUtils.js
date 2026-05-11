@@ -51,3 +51,15 @@ export function getTemperature(distanceKm) {
   if (distanceKm <= 4000) return { label: 'Cold', color: '#3b82f6' }; // Blue
   return { label: 'Freezing', color: '#1e3a8a' }; // Dark Blue
 }
+
+// Round score: 5000 × (1 - distance / 20000)², clamped to 0
+export function calcRoundScore(distanceKm) {
+  return Math.max(0, 5000 * Math.pow(1 - distanceKm / 20000, 2));
+}
+
+// Final score: best round × 0.75^(guesses-1) − 400 per hint, clamped to 0
+export function calcFinalScore(distances, hintsUsed = 0) {
+  if (distances.length === 0) return 0;
+  const best = Math.max(...distances.map(calcRoundScore));
+  return Math.max(0, Math.round(best * Math.pow(0.75, distances.length - 1) - hintsUsed * 400));
+}

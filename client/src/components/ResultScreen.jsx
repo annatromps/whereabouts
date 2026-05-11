@@ -3,10 +3,15 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import '../styles/ResultScreen.css';
 
-function calcScore(distanceKm, guessCount) {
-  const base = Math.round(5000 * Math.max(0, 1 - distanceKm / 50));
-  return Math.max(0, base - (guessCount - 1) * 500);
-}
+const TEMP_EMOJI = {
+  'Correct!':  '✅',
+  'Scorching': '🔥',
+  'Hot':       '🌡️',
+  'Warm':      '☀️',
+  'Cool':      '🌤️',
+  'Cold':      '❄️',
+  'Freezing':  '🥶',
+};
 
 function guessLabel(n) {
   if (n === 1) return { emoji: '🎯', text: 'Got it in one!' };
@@ -16,23 +21,19 @@ function guessLabel(n) {
   return { emoji: '🌍', text: `${n} guesses – what a journey!` };
 }
 
-function starRating(n) {
-  if (n === 1) return '⭐⭐⭐⭐⭐';
-  if (n === 2) return '⭐⭐⭐⭐';
-  if (n === 3) return '⭐⭐⭐';
-  if (n === 4) return '⭐⭐';
-  return '⭐';
-}
-
 function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorName, shareUrl }) {
   const [copied, setCopied] = useState(false);
 
-  const score = calcScore(lastFeedback.distance, guessCount);
   const { emoji, text } = guessLabel(guessCount);
 
   const answerLat = Number.isFinite(lastFeedback.answerLat) ? lastFeedback.answerLat : 0;
   const answerLng = Number.isFinite(lastFeedback.answerLng) ? lastFeedback.answerLng : 0;
   const hasValidAnswer = Number.isFinite(lastFeedback.answerLat) && Number.isFinite(lastFeedback.answerLng);
+
+  const score = lastFeedback.score ?? 0;
+  const temperatures = lastFeedback.guessTemperatures ?? [];
+  const firstDist = lastFeedback.firstGuessDistance ?? Math.round(lastFeedback.distance);
+  const emojiRow = temperatures.map(t => TEMP_EMOJI[t] ?? '📍').join('');
 
   const answerIcon = L.icon({
     iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNFNDQ5NDciIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMjEgMTBjMCA3LTkgMTMtOSAxM3MtOSAtNiAtOSAtMTNhOSA5IDAgMCAxIDE4IDB6Ii8+PC9zdmc+',
@@ -40,24 +41,23 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
     iconAnchor: [16, 41]
   });
 
+  const buildSummary = () => {
+    const header = creatorName ? `📍 Whereabouts is ${creatorName}?` : '📍 Whereabouts';
+    const guessLine = `🎯 ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'} · first guess ${firstDist}km off`;
+    return [header, guessLine, emojiRow, `${score.toLocaleString()}pts`].join('\n');
+  };
+
   const handleShare = async () => {
     const gameUrl = shareUrl || `${window.location.origin}/game/${gameId}`;
-    const stars = starRating(guessCount);
-    const header = creatorName
-      ? `Whereabouts is ${creatorName}? 📍`
-      : 'Whereabouts 📍';
-    const body = `I scored ${stars} in ${guessCount} ${guessCount === 1 ? 'guess' : 'guesses'}!\nCan you do better?`;
-    const shareText = `${header}\n${body}`;
+    const summary = buildSummary();
 
     if (navigator.share) {
       try {
-        // Pass url separately so the platform handles the link preview
-        await navigator.share({ title: 'Whereabouts', text: shareText, url: gameUrl });
+        await navigator.share({ title: 'Whereabouts', text: summary, url: gameUrl });
       } catch { /* user cancelled */ }
     } else {
       try {
-        // Clipboard fallback — URL on its own line for WhatsApp paste
-        await navigator.clipboard.writeText(`${shareText}\n${gameUrl}`);
+        await navigator.clipboard.writeText(`${summary}\n${gameUrl}`);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
       } catch { /* unavailable */ }
@@ -83,6 +83,11 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
           <span>{lastFeedback.distance} km from the spot</span>
         </div>
 
+        {/* Emoji history row */}
+        {emojiRow && (
+          <div className="result-emoji-row">{emojiRow}</div>
+        )}
+
         {hasValidAnswer ? (
           <MapContainer center={[answerLat, answerLng]} zoom={6} className="result-map" attributionControl={false}>
             <TileLayer
@@ -98,7 +103,7 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
         )}
 
         <button onClick={handleShare} className="btn btn-primary btn-large" style={{ marginBottom: '12px' }}>
-          {copied ? '✅ Copied to clipboard!' : '📤 Share your score'}
+          {copied ? '✅ Copied to clipboard!' : '📤 Share result'}
         </button>
         <button onClick={onPlayAgain} className="btn btn-large" style={{ background: '#FFCCD6', color: '#E44947' }}>
           🎮 Play Again

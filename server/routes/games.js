@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import jwt from 'jsonwebtoken';
 import { getDb } from '../db.js';
-import { generateGameId, calculateDistance, getDirection, getTemperature } from '../utils/gameUtils.js';
+import { generateGameId, calculateDistance, getDirection, getTemperature, calcFinalScore } from '../utils/gameUtils.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'whereabouts-dev-secret-change-in-production';
 
@@ -130,8 +130,8 @@ router.post('/:gameId/guess', (req, res) => {
     db.run(
       'INSERT INTO guesses (game_id, lat, lng, distance_km) VALUES (?, ?, ?, ?)',
       [gameId, guessLat, guessLng, distance],
-      (err) => {
-        if (err) {
+      (insertErr) => {
+        if (insertErr) {
           return res.status(500).json({ error: 'Failed to store guess' });
         }
 
@@ -143,12 +143,32 @@ router.post('/:gameId/guess', (req, res) => {
           correct
         };
 
-        if (correct) {
-          response.answerLat = game.answer_lat;
-          response.answerLng = game.answer_lng;
+        if (!correct) {
+          return res.json(response);
         }
 
-        res.json(response);
+        // Winning guess — compute score and history entirely server-side
+        response.answerLat = game.answer_lat;
+        response.answerLng = game.answer_lng;
+
+        db.all(
+          'SELECT distance_km FROM guesses WHERE game_id = ? ORDER BY created_at ASC',
+          [gameId],
+          (err, rows) => {
+            if (err) return res.status(500).json({ error: 'Failed to calculate score' });
+
+            const distances = rows.map(r => r.distance_km);
+            response.score = calcFinalScore(distances);
+            response.guessCount = distances.length;
+            response.firstGuessDistance = Math.round(distances[0]);
+            // Winning guess always shown as Correct! in the history row
+            response.guessTemperatures = rows.map((r, i) =>
+              i === rows.length - 1 ? 'Correct!' : getTemperature(r.distance_km).label
+            );
+
+            res.json(response);
+          }
+        );
       }
     );
   });
