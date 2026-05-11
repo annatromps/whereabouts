@@ -320,8 +320,8 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
         <div className="map-picker-map-area">
           <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef} zoomControl={false} attributionControl={false}>
             <TileLayer
-              url="https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             <ZoomControl position="bottomright" />
             <MapClickHandler onMapClick={handleMapClick} />
