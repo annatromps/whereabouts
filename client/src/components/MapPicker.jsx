@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import { gps as readExifGps } from 'exifr';
 import ThemedLoader from './ThemedLoader';
@@ -280,11 +280,12 @@ function MapPicker({ file, photoSource = 'upload', onConfirm, loading, onBack })
         </div>
 
         <div className="map-picker-map-area">
-          <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef}>
+          <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef} zoomControl={false}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; OpenStreetMap contributors'
             />
+            <ZoomControl position="bottomright" />
             <MapClickHandler onMapClick={handleMapClick} />
             <FlyTo target={flyTarget} />
             {isValidPos(markerPos) && (

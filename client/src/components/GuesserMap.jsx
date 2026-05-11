@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvent, Marker, Popup, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import '../styles/GuesserMap.css';
 
@@ -130,7 +130,8 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
         )}
       </div>
 
-      <MapContainer center={[20, 0]} zoom={2} className="guesser-map-instance">
+      <MapContainer center={[20, 0]} zoom={2} className="guesser-map-instance" zoomControl={false}>
+        <ZoomControl position="bottomright" />
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
