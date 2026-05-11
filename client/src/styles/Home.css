@@ -32,7 +32,7 @@
 .title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: clamp(2rem, 8vw, 3.2rem);
+  font-size: clamp(1.5rem, 6.5vw, 2.6rem);
   margin-bottom: 6px;
   text-align: left;
   letter-spacing: -0.02em;
@@ -51,7 +51,6 @@
 /* ── CTA button ── */
 
 .home-content .button-group {
-  align-items: center;
   gap: 8px;
 }
 
