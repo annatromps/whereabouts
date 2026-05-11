@@ -97,11 +97,11 @@
 
 .map-location-icon-btn {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
+  align-self: stretch;
+  width: 50px;
+  background: transparent;
   border: none;
+  border-left: 1px solid rgba(0, 0, 0, 0.07);
   color: #6b7280;
   display: flex;
   align-items: center;
@@ -113,12 +113,12 @@
 }
 
 .map-location-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   color: #374151;
 }
 
 .map-location-icon-btn:active {
-  background: rgba(228, 73, 71, 0.12);
+  background: rgba(228, 73, 71, 0.08);
   color: #E44947;
 }
 
@@ -147,9 +147,10 @@
   background: white;
   border-radius: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
-  padding: 0 6px 0 14px;
+  padding: 0 0 0 14px;
   height: 48px;
-  gap: 8px;
+  gap: 6px;
+  overflow: hidden;
 }
 
 .map-search-icon {

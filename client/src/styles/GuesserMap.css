@@ -22,21 +22,22 @@
 .guesser-search-input-wrapper {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: white;
-  border-radius: 24px;
-  padding: 0 5px 0 14px;
+  border-radius: 22px;
+  padding: 0 0 0 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   height: 44px;
+  overflow: hidden;
 }
 
 .guesser-location-icon-btn {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
+  align-self: stretch;
+  width: 46px;
+  background: transparent;
   border: none;
+  border-left: 1px solid rgba(0, 0, 0, 0.07);
   color: #6b7280;
   display: flex;
   align-items: center;
@@ -48,12 +49,12 @@
 }
 
 .guesser-location-icon-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   color: #374151;
 }
 
 .guesser-location-icon-btn:active {
-  background: rgba(228, 73, 71, 0.12);
+  background: rgba(228, 73, 71, 0.08);
   color: #E44947;
 }
 

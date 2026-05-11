@@ -27,13 +27,14 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-const CrosshairIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-    <circle cx="12" cy="12" r="4"/>
-    <line x1="12" y1="2" x2="12" y2="8"/>
-    <line x1="12" y1="16" x2="12" y2="22"/>
-    <line x1="2" y1="12" x2="8" y2="12"/>
-    <line x1="16" y1="12" x2="22" y2="12"/>
+const LocationIcon = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <circle cx="12" cy="12" r="7.5"/>
+    <line x1="12" y1="2"  x2="12" y2="4.5"/>
+    <line x1="12" y1="19.5" x2="12" y2="22"/>
+    <line x1="2"  y1="12" x2="4.5" y2="12"/>
+    <line x1="19.5" y1="12" x2="22" y2="12"/>
   </svg>
 );
 
@@ -296,7 +297,7 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
                 disabled={loading || geoLoading}
                 aria-label="Use my location"
               >
-                {geoLoading ? <span className="tl-search-spin" /> : <CrosshairIcon />}
+                {geoLoading ? <span className="tl-search-spin" /> : <LocationIcon />}
               </button>
             </div>
             {showResults && searchResults.length > 0 && (
