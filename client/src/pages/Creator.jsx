@@ -245,7 +245,7 @@ function Creator() {
         </div>
       )}
 
-      {step === 'share' && gameData && <ShareModal gameData={gameData} />}
+      {step === 'share' && gameData && <ShareModal gameData={gameData} onBackToMap={() => setStep('map')} />}
     </div>
   );
 }

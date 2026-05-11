@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import QRCode from 'qrcode.react';
 import { useAuth } from '../context/AuthContext';
 import '../styles/ShareModal.css';
 
-function ShareModal({ gameData }) {
+function ShareModal({ gameData, onBackToMap }) {
   const [copied, setCopied] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(gameData.shareUrl);
@@ -35,48 +32,29 @@ function ShareModal({ gameData }) {
     }
   };
 
-  const handleDownloadQR = () => {
-    const element = document.querySelector('canvas');
-    const link = document.createElement('a');
-    link.href = element.toDataURL('image/png');
-    link.download = `whereabouts-${gameData.gameId}.png`;
-    link.click();
-  };
-
   return (
     <div className="share-modal-container">
       <div className="share-modal card">
         <h2>🎉 Game Created!</h2>
         <p className="game-id">Game ID: <strong>{gameData.gameId}</strong></p>
 
+        <button onClick={handleShare} className="share-primary-btn">
+          {shareCopied ? '✅ Copied to clipboard!' : '📤 Share Challenge'}
+        </button>
+
         <div className="share-section">
-          <h3>Share Link</h3>
+          <p className="share-link-label">Or copy the link manually</p>
           <div className="share-link-box">
             <input type="text" value={gameData.shareUrl} readOnly />
-            <button onClick={handleCopyLink} className="btn btn-primary">
-              {copied ? '✓ Copied!' : '📋 Copy'}
+            <button onClick={handleCopyLink} className="btn btn-ghost share-copy-btn">
+              {copied ? '✓' : '📋'}
             </button>
           </div>
         </div>
 
-        <div className="qr-section">
-          <h3>QR Code</h3>
-          <div className="qr-container">
-            <QRCode value={gameData.shareUrl} size={Math.min(256, window.innerWidth - 100)} level="H" includeMargin={true} />
-          </div>
-          <button onClick={handleDownloadQR} className="btn btn-secondary">
-            📥 Download QR Code
-          </button>
-        </div>
-
-        <div className="button-group">
-          <button onClick={handleShare} className="btn btn-primary">
-            {shareCopied ? '✅ Copied to clipboard!' : '📤 Share Challenge'}
-          </button>
-          <button onClick={() => navigate('/')} className="btn btn-ghost">
-            ← Back to Home
-          </button>
-        </div>
+        <button onClick={onBackToMap} className="creator-back-link">
+          ← Back to map
+        </button>
       </div>
     </div>
   );
