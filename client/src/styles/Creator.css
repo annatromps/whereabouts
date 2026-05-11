@@ -1,24 +1,35 @@
+/* Outer centering wrapper — same pattern as map-picker-container */
 .creator-container {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
+  padding: 20px;
 }
 
+/* The persistent white card — all creator steps live inside this */
+.creator-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Photo selection step ── */
+
 .creator-photo-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: auto;
+  padding: 32px 24px;
   overflow-y: auto;
-  padding: 32px 20px;
-  max-width: 500px;
-  width: 100%;
-  margin: 0 auto;
 }
 
 .creator-photo-section h1 {
@@ -35,39 +46,59 @@
   width: 100%;
 }
 
+/* ── Camera viewfinder — fills the card ── */
+
 .camera-view {
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   position: relative;
 }
 
 .camera-view video {
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
 .capture-btn {
   position: absolute;
-  bottom: 30px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 15px 40px;
-  font-size: 1.1rem;
-  background-color: white;
-  color: #3b82f6;
+  padding: 14px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1f2937;
   border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
 }
 
+/* ── Map step ── */
+
 .creator-map-section {
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* MapPicker: strip its own card shell so it fills creator-card seamlessly */
+.creator-card .map-picker-container {
+  padding: 0;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.creator-card .map-picker-content {
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .size-warning {
@@ -80,12 +111,40 @@
   flex-shrink: 0;
 }
 
-/* MapPicker must fill remaining height when a warning banner is present */
-.creator-map-section .map-picker-container {
+.error-banner {
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 10px 16px;
+  text-align: center;
+  border-bottom: 1px solid #fecaca;
+  flex-shrink: 0;
+}
+
+/* ── Share step: strip ShareModal's own pink container shell ── */
+
+.creator-card .share-modal-container {
+  background: transparent;
   flex: 1;
   min-height: 0;
-  height: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
 }
+
+.creator-card .share-modal {
+  max-width: none;
+  width: 100%;
+  border-radius: 0;
+  box-shadow: none;
+  flex: 1;
+}
+
+/* ── Shared ── */
 
 .creator-back-link {
   margin-top: 20px;
@@ -107,15 +166,3 @@
   margin-top: 15px;
   text-align: center;
 }
-
-.error-banner {
-  background: #fef2f2;
-  color: #dc2626;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 10px 16px;
-  text-align: center;
-  border-bottom: 1px solid #fecaca;
-  flex-shrink: 0;
-}
-

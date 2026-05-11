@@ -101,8 +101,7 @@ function Creator() {
         video: { facingMode: 'environment', width: { ideal: 4096 }, height: { ideal: 2160 } }
       });
       videoRef.current.srcObject = stream;
-      document.querySelector('.creator-photo-section').style.display = 'none';
-      document.querySelector('.camera-view').style.display = 'block';
+      setStep('camera');
 
       // Start geo immediately so it has the full time the user spends framing/shooting to resolve.
       setCameraLocation(null);
@@ -135,8 +134,6 @@ function Creator() {
       setPhotoSource('camera');
       setPhoto(url);
       setSizeWarning('');
-      document.querySelector('.creator-photo-section').style.display = 'block';
-      document.querySelector('.camera-view').style.display = 'none';
       setStep('map');
     }, 'image/jpeg', 0.95);
   };
@@ -211,56 +208,61 @@ function Creator() {
 
   return (
     <div className="creator-container">
-      {step === 'photo' && (
-        <div className="creator-photo-section">
-          <h1>📸 Create a Game</h1>
-          <p>Choose how you want to add a photo:</p>
-          <div className="button-group">
-            <button onClick={startCamera} className="btn btn-primary">
-              📷 Take a Photo
+      <div className="creator-card">
+        {step === 'photo' && (
+          <div className="creator-photo-section">
+            <h1>📸 Create a Game</h1>
+            <p>Choose how you want to add a photo:</p>
+            <div className="button-group">
+              <button onClick={startCamera} className="btn btn-primary">
+                📷 Take a Photo
+              </button>
+              <button onClick={() => fileInputRef.current.click()} className="btn btn-secondary">
+                📤 Upload from Device
+              </button>
+            </div>
+            <button onClick={() => navigate('/')} className="creator-back-link">
+              ← Back
             </button>
-            <button onClick={() => fileInputRef.current.click()} className="btn btn-secondary">
-              📤 Upload from Device
-            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
+            {error && <p className="error">{error}</p>}
           </div>
-          <button onClick={() => navigate('/')} className="creator-back-link">
-            ← Back
+        )}
+
+        {/* Always mounted so videoRef is available before setStep('camera') */}
+        <div className="camera-view" style={{ display: step === 'camera' ? 'flex' : 'none' }}>
+          <video ref={videoRef} autoPlay playsInline />
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+          <button onClick={capturePhoto} className="btn btn-primary capture-btn">
+            📸 Capture
           </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            style={{ display: 'none' }}
-          />
-          {error && <p className="error">{error}</p>}
         </div>
-      )}
 
-      <div className="camera-view" style={{ display: 'none' }}>
-        <video ref={videoRef} autoPlay playsInline />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-        <button onClick={capturePhoto} className="btn btn-primary capture-btn">
-          📸 Capture
-        </button>
+        {step === 'map' && photo && (
+          <div className="creator-map-section">
+            {sizeWarning && <div className="size-warning">{sizeWarning}</div>}
+            {error && <div className="error-banner">⚠️ {error}</div>}
+            <MapPicker
+              file={originalFile}
+              photoSource={photoSource}
+              cameraLocation={photoSource === 'camera' ? cameraLocation : null}
+              onConfirm={handleMapConfirm}
+              loading={loading}
+              onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); setCameraLocation(null); }}
+            />
+          </div>
+        )}
+
+        {step === 'share' && gameData && (
+          <ShareModal gameData={gameData} onBackToMap={() => setStep('map')} />
+        )}
       </div>
-
-      {step === 'map' && photo && (
-        <div className="creator-map-section">
-          {sizeWarning && <div className="size-warning">{sizeWarning}</div>}
-          {error && <div className="error-banner">⚠️ {error}</div>}
-          <MapPicker
-            file={originalFile}
-            photoSource={photoSource}
-            cameraLocation={photoSource === 'camera' ? cameraLocation : null}
-            onConfirm={handleMapConfirm}
-            loading={loading}
-            onBack={() => { setStep('photo'); setSizeWarning(''); setOriginalFile(null); setError(''); setCameraLocation(null); }}
-          />
-        </div>
-      )}
-
-      {step === 'share' && gameData && <ShareModal gameData={gameData} onBackToMap={() => setStep('map')} />}
     </div>
   );
 }
