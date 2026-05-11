@@ -133,8 +133,8 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
       <MapContainer center={[20, 0]} zoom={2} className="guesser-map-instance" zoomControl={false}>
         <ZoomControl position="bottomright" />
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         />
         <MapClickHandler onMarkerChange={onMarkerChange} />
         <FlyTo target={flyTarget} />

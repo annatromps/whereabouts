@@ -86,8 +86,8 @@ function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorNa
         {hasValidAnswer ? (
           <MapContainer center={[answerLat, answerLng]} zoom={6} className="result-map">
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; OpenStreetMap contributors'
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
             <Marker position={[answerLat, answerLng]} icon={answerIcon}>
               <Popup>Correct location</Popup>
