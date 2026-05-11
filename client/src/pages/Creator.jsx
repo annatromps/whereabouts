@@ -202,10 +202,10 @@ function Creator() {
             <button onClick={startCamera} className="btn btn-secondary">
               📷 Take a Photo
             </button>
-            <button onClick={() => navigate('/')} className="btn btn-ghost">
-              ← Back
-            </button>
           </div>
+          <button onClick={() => navigate('/')} className="creator-back-link">
+            ← Back
+          </button>
           <input
             ref={fileInputRef}
             type="file"

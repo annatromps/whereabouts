@@ -131,6 +131,21 @@
   height: auto;
 }
 
+.creator-back-link {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 6px 4px;
+  transition: color 0.15s;
+}
+
+.creator-back-link:hover {
+  color: #6b7280;
+}
+
 .error {
   color: #dc2626;
   margin-top: 15px;
