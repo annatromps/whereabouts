@@ -20,7 +20,7 @@ function Guesser() {
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
-  const [instructionsSeen, setInstructionsSeen] = useState(false);
+  const [instructionsSeen, setInstructionsSeen] = useState(true);
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -136,15 +136,13 @@ function Guesser() {
           />
         )}
 
-        {instructionsSeen && (
-          <button
-            className="guesser-info-btn"
-            onClick={() => setInstructionsOpen(true)}
-            aria-label="Show instructions"
-          >
-            i
-          </button>
-        )}
+        <button
+          className="guesser-info-btn"
+          onClick={() => setInstructionsOpen(true)}
+          aria-label="Show instructions"
+        >
+          i
+        </button>
 
         <div className="guesser-photo-area">
           <div className="guesser-photo-frame">
