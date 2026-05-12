@@ -167,8 +167,8 @@ function GuesserMap({ markerPos, onMarkerChange, isVisible, pastGuesses = [] }) 
       <MapContainer center={[20, 0]} zoom={2} className="guesser-map-instance" zoomControl={false} attributionControl={false}>
         <ZoomControl position="bottomright" />
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+          attribution='Tiles © Esri'
         />
         <MapClickHandler onMarkerChange={onMarkerChange} />
         <FlyTo target={flyTarget} />

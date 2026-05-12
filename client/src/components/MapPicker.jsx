@@ -320,8 +320,8 @@ function MapPicker({ file, photoSource = 'upload', cameraLocation = null, onConf
         <div className="map-picker-map-area">
           <MapContainer center={[20, 0]} zoom={2} className="map-picker-map" ref={mapRef} zoomControl={false} attributionControl={false}>
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+              attribution='Tiles © Esri'
             />
             <ZoomControl position="bottomright" />
             <MapClickHandler onMapClick={handleMapClick} />
