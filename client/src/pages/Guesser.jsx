@@ -110,7 +110,7 @@ function Guesser() {
   if (gameState === 'won') {
     return (
       <ResultScreen
-        guessCount={guesses.length}
+        guesses={guesses}
         lastFeedback={lastFeedback}
         onPlayAgain={() => navigate('/')}
         gameId={gameId}

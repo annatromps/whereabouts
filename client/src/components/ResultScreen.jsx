@@ -21,18 +21,28 @@ function guessLabel(n) {
   return { emoji: '🌍', text: `${n} guesses – what a journey!` };
 }
 
-function ResultScreen({ guessCount, lastFeedback, onPlayAgain, gameId, creatorName, shareUrl }) {
+function ResultScreen({ guesses = [], lastFeedback, onPlayAgain, gameId, creatorName, shareUrl }) {
   const [copied, setCopied] = useState(false);
 
+  const guessCount = guesses.length;
   const { emoji, text } = guessLabel(guessCount);
 
   const answerLat = Number.isFinite(lastFeedback.answerLat) ? lastFeedback.answerLat : 0;
   const answerLng = Number.isFinite(lastFeedback.answerLng) ? lastFeedback.answerLng : 0;
   const hasValidAnswer = Number.isFinite(lastFeedback.answerLat) && Number.isFinite(lastFeedback.answerLng);
 
-  const score = lastFeedback.score ?? 0;
-  const temperatures = lastFeedback.guessTemperatures ?? [];
-  const firstDist = lastFeedback.firstGuessDistance ?? Math.round(lastFeedback.distance);
+  // Derive all share stats from this player's own guesses only
+  const ownDistances = guesses.map(g => g.feedback.distance);
+  const temperatures = guesses.map((g, i) =>
+    i === guesses.length - 1 ? 'Correct!' : g.feedback.temperature
+  );
+  const firstDist = ownDistances[0] ?? Math.round(lastFeedback.distance);
+  const score = (() => {
+    if (!ownDistances.length) return 0;
+    const roundScores = ownDistances.map(d => Math.max(0, 5000 * Math.pow(1 - d / 20000, 2)));
+    const best = Math.max(...roundScores);
+    return Math.max(0, Math.round(best * Math.pow(0.75, ownDistances.length - 1)));
+  })();
   const emojiRow = temperatures.map(t => TEMP_EMOJI[t] ?? '📍').join('');
 
   const answerIcon = L.icon({
