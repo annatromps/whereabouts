@@ -20,7 +20,9 @@ function Guesser() {
   const [guessing, setGuessing] = useState(false);
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
-  const [instructionsSeen, setInstructionsSeen] = useState(true);
+  const [instructionsSeen, setInstructionsSeen] = useState(
+    () => !!localStorage.getItem('whereabouts_instructions_seen')
+  );
   const [instructionsOpen, setInstructionsOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -130,6 +132,7 @@ function Guesser() {
         {(!instructionsSeen || instructionsOpen) && (
           <WelcomeOverlay
             onDismiss={() => {
+              localStorage.setItem('whereabouts_instructions_seen', '1');
               setInstructionsSeen(true);
               setInstructionsOpen(false);
             }}
