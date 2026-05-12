@@ -120,10 +120,13 @@ function Guesser() {
     );
   }
 
-  /* ── Photo view ── */
-  if (view === 'photo') {
-    return (
-      <div className="guesser-photo-screen">
+  const onPhoto = view === 'photo';
+
+  /* ── Both views always mounted; toggled with display so map keeps its position ── */
+  return (
+    <>
+      {/* Photo view */}
+      <div className="guesser-photo-screen" style={{ display: onPhoto ? 'flex' : 'none' }}>
         {(!instructionsSeen || instructionsOpen) && (
           <WelcomeOverlay
             onDismiss={() => {
@@ -159,52 +162,50 @@ function Guesser() {
           <p className="guesser-win-hint">Get within {winRadius} km to win</p>
         </div>
       </div>
-    );
-  }
 
-  /* ── Map view ── */
-  return (
-    <div className="guesser-container">
-      <div className="guesser-map-fullscreen">
-        <GuesserMap
-          markerPos={markerPos}
-          onMarkerChange={setMarkerPos}
-          isVisible={true}
-          pastGuesses={guesses}
-        />
-      </div>
-
-      {lastFeedback && (
-        <div key={guesses.length} className="guesser-feedback-pill slideIn">
-          <span className="gfp-temp" style={{ color: lastFeedback.temperatureColor }}>
-            {lastFeedback.temperature}
-          </span>
-          <span className="gfp-sep" />
-          <span>📍 {lastFeedback.distance} km</span>
-          <span className="gfp-sep" />
-          <span>🧭 {lastFeedback.direction}</span>
+      {/* Map view */}
+      <div className="guesser-container" style={{ display: onPhoto ? 'none' : 'block' }}>
+        <div className="guesser-map-fullscreen">
+          <GuesserMap
+            markerPos={markerPos}
+            onMarkerChange={setMarkerPos}
+            isVisible={!onPhoto}
+            pastGuesses={guesses}
+          />
         </div>
-      )}
 
-      <div className="guesser-map-bottom-bar">
-        {!isValidPos(markerPos) && !guessing && (
-          <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
+        {lastFeedback && (
+          <div key={guesses.length} className="guesser-feedback-pill slideIn">
+            <span className="gfp-temp" style={{ color: lastFeedback.temperatureColor }}>
+              {lastFeedback.temperature}
+            </span>
+            <span className="gfp-sep" />
+            <span>📍 {lastFeedback.distance} km</span>
+            <span className="gfp-sep" />
+            <span>🧭 {lastFeedback.direction}</span>
+          </div>
         )}
-        <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
-          📷 View photo
-        </button>
-        <p className="guesser-win-hint">Get within {winRadius} km to win</p>
-        {isValidPos(markerPos) && (
-          <button
-            className="guesser-submit-btn"
-            onClick={handleSubmitGuess}
-            disabled={guessing}
-          >
-            {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Submit guess'}
+
+        <div className="guesser-map-bottom-bar">
+          {!isValidPos(markerPos) && !guessing && (
+            <p className="guesser-map-hint">📍 Tap the map to place your pin</p>
+          )}
+          <button className="guesser-view-photo-btn" onClick={() => setView('photo')}>
+            📷 View photo
           </button>
-        )}
+          <p className="guesser-win-hint">Get within {winRadius} km to win</p>
+          {isValidPos(markerPos) && (
+            <button
+              className="guesser-submit-btn"
+              onClick={handleSubmitGuess}
+              disabled={guessing}
+            >
+              {guessing ? <><ThemedLoader variant="dots" />Submitting…</> : '🎯 Submit guess'}
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
