@@ -89,7 +89,7 @@ function Creator() {
     setOriginalFile(file);
     setPhotoSource('upload');
     setError('');
-    setSizeWarning(sizeMB > 15 ? `Large file (${sizeMB.toFixed(1)} MB) — will resize before uploading` : '');
+    setSizeWarning(sizeMB > 5 ? `Large file (${sizeMB.toFixed(1)} MB) — will resize before uploading` : '');
 
     // Navigate to map — MapPicker handles EXIF reading with the raw file
     setStep('map');
@@ -148,8 +148,8 @@ function Creator() {
 
     try {
       const source = originalFileRef.current;
-      const blob = source.size > 15 * 1024 * 1024
-        ? await resizeImage(source, 4096)
+      const blob = source.size > 500 * 1024
+        ? await resizeImage(source, 1600)
         : source;
       setSizeWarning('');
 
