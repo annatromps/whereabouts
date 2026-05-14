@@ -148,9 +148,12 @@ function Creator() {
 
     try {
       const source = originalFileRef.current;
-      const blob = source.size > 500 * 1024
-        ? await resizeImage(source, 1600)
-        : source;
+      const blob = await resizeImage(source, 1600);
+      // If canvas fell back to the original (unsupported format etc.), catch it
+      // here rather than letting a multi-MB upload produce a silent network error.
+      if (blob.size > 5 * 1024 * 1024) {
+        throw new Error('Photo is too large to upload. Please try a JPEG photo.');
+      }
       setSizeWarning('');
 
       const formData = new FormData();
