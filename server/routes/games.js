@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 import jwt from 'jsonwebtoken';
 import { getDb } from '../db.js';
 import { generateGameId, calculateDistance, getDirection, getTemperature, calcFinalScore } from '../utils/gameUtils.js';
@@ -8,25 +7,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'whereabouts-dev-secret-change-in-p
 
 const router = express.Router();
 
-// Store uploads in memory — avoids all filesystem path issues on Railway/cloud
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB hard cap (client resizes to ~300 KB)
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'));
-    }
-  }
-});
-
 // POST /api/games — Create a new game
-router.post('/', upload.single('photo'), (req, res) => {
-  const { lat, lng } = req.body;
-  console.log('[games] POST /api/games — file:', req.file ? `${req.file.size} bytes, ${req.file.mimetype}` : 'MISSING', '| lat:', lat, '| lng:', lng, '| lat type:', typeof lat);
+// Photo arrives as a base64 data URI in the JSON body (no multipart/multer).
+// Railway's Caddy proxy mangles multipart requests; plain JSON works fine.
+router.post('/', (req, res) => {
+  const { photo, lat, lng, win_radius_km } = req.body;
+  const approxBytes = photo ? Math.round((photo.length - 22) * 0.75) : 0;
+  console.log('[games] POST /api/games — photo:', photo ? `~${approxBytes} bytes` : 'MISSING', '| lat:', lat, '| lng:', lng);
   try {
-    if (!req.file) {
+    if (!photo || !photo.startsWith('data:image/')) {
       return res.status(400).json({ error: 'No photo provided' });
     }
 
@@ -38,7 +27,7 @@ router.post('/', upload.single('photo'), (req, res) => {
       return res.status(400).json({ error: 'Invalid coordinates' });
     }
 
-    const winRadiusRaw = parseInt(req.body.win_radius_km);
+    const winRadiusRaw = parseInt(win_radius_km);
     const winRadius = Number.isFinite(winRadiusRaw) ? Math.min(500, Math.max(10, winRadiusRaw)) : 50;
 
     // Optional auth — attach creator username if a valid JWT is present
@@ -53,12 +42,11 @@ router.post('/', upload.single('photo'), (req, res) => {
     }
 
     const gameId = generateGameId();
-    const photoData = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const db = getDb();
 
     db.run(
       'INSERT INTO games (id, photo_path, answer_lat, answer_lng, creator_username, win_radius_km) VALUES (?, ?, ?, ?, ?, ?)',
-      [gameId, photoData, answerLat, answerLng, creatorUsername, winRadius],
+      [gameId, photo, answerLat, answerLng, creatorUsername, winRadius],
       (err) => {
         try {
           if (err) {
@@ -69,7 +57,7 @@ router.post('/', upload.single('photo'), (req, res) => {
             ? process.env.BASE_URL.replace(/\/$/, '')
             : `${req.protocol}://${req.get('host')}`;
           const shareUrl = `${rawBase.replace(/^https?:\/\//, '')}/game/${gameId}`;
-          console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (photo ${req.file.size} bytes) shareUrl: ${shareUrl}`);
+          console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (~${approxBytes} bytes) shareUrl: ${shareUrl}`);
           res.json({ gameId, creatorName: creatorUsername, shareUrl });
         } catch (callbackErr) {
           console.error('[games] Error sending response after DB insert:', callbackErr);

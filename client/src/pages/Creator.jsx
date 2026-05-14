@@ -165,19 +165,18 @@ function Creator() {
       }
       setSizeWarning('');
 
-      const formData = new FormData();
-      formData.append('photo', blob, 'photo.jpg');
-      formData.append('lat', coordinates.lat);
-      formData.append('lng', coordinates.lng);
-      formData.append('win_radius_km', winRadius);
+      // Encode as base64 data URI — sent as JSON to avoid Railway's proxy mangling multipart.
+      const photoDataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Failed to encode photo'));
+        reader.readAsDataURL(blob);
+      });
 
       console.log('[Creator] POST /api/games payload:', {
-        blobSize: blob.size,
-        blobType: blob.type,
+        photoBytes: blob.size,
         lat: coordinates.lat,
         lng: coordinates.lng,
-        latType: typeof coordinates.lat,
-        lngType: typeof coordinates.lng,
         latValid: Number.isFinite(coordinates.lat),
         lngValid: Number.isFinite(coordinates.lng),
       });
@@ -185,8 +184,16 @@ function Creator() {
       const token = getToken();
       const response = await fetch('/api/games', {
         method: 'POST',
-        body: formData,
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          photo: photoDataUrl,
+          lat: coordinates.lat,
+          lng: coordinates.lng,
+          win_radius_km: winRadius,
+        }),
       });
 
       if (!response.ok) {
