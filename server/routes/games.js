@@ -60,16 +60,20 @@ router.post('/', upload.single('photo'), (req, res) => {
       'INSERT INTO games (id, photo_path, answer_lat, answer_lng, creator_username, win_radius_km) VALUES (?, ?, ?, ?, ?, ?)',
       [gameId, photoData, answerLat, answerLng, creatorUsername, winRadius],
       (err) => {
-        if (err) {
-          console.error('[games] DB insert error:', err);
-          return res.status(500).json({ error: 'Failed to save game to database' });
+        try {
+          if (err) {
+            console.error('[games] DB insert error:', err);
+            return res.status(500).json({ error: 'Failed to save game to database' });
+          }
+          const rawBase = process.env.BASE_URL
+            ? process.env.BASE_URL.replace(/\/$/, '')
+            : `${req.protocol}://${req.get('host')}`;
+          const shareUrl = `${rawBase.replace(/^https?:\/\//, '')}/game/${gameId}`;
+          console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (photo ${req.file.size} bytes) shareUrl: ${shareUrl}`);
+          res.json({ gameId, creatorName: creatorUsername, shareUrl });
+        } catch (callbackErr) {
+          console.error('[games] Error sending response after DB insert:', callbackErr);
         }
-        const rawBase = process.env.BASE_URL
-          ? process.env.BASE_URL.replace(/\/$/, '')
-          : `${req.protocol}://${req.get('host')}`;
-        const shareUrl = `${rawBase.replace(/^https?:\/\//, '')}/game/${gameId}`;
-        console.log(`[games] Created game ${gameId} by ${creatorUsername ?? 'anonymous'} (photo ${req.file.size} bytes) shareUrl: ${shareUrl}`);
-        res.json({ gameId, creatorName: creatorUsername, shareUrl });
       }
     );
   } catch (err) {

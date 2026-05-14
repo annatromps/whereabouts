@@ -12,6 +12,18 @@ import authRouter from './routes/auth.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Prevent any unhandled error from silently crashing the process — log and keep running.
+// Without this, exceptions thrown inside sqlite3 callbacks (which fire from C++ land)
+// would exit Node, tear down the TCP socket, and the browser sees "Failed to fetch".
+process.on('uncaughtException', (err) => {
+  console.error('[server] UNCAUGHT EXCEPTION (server kept alive):', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[server] UNHANDLED REJECTION (server kept alive):', reason);
+});
+
+const START_TIME = new Date().toISOString();
+
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
@@ -27,7 +39,7 @@ await initDb();
 
 // Routes
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', env: process.env.NODE_ENV || 'development', port: PORT });
+  res.json({ status: 'ok', env: process.env.NODE_ENV || 'development', port: PORT, startedAt: START_TIME });
 });
 app.use('/api/auth', authRouter);
 app.use('/api/games', gamesRouter);

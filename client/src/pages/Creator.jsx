@@ -6,16 +6,22 @@ import { useAuth } from '../context/AuthContext';
 import '../styles/Creator.css';
 
 // Resize a File/Blob to maxDim on its longest side, re-encode as JPEG.
-// Returns a Blob. Falls back to the original if anything goes wrong.
-// 10-second safety timeout guards against canvas.toBlob never firing.
+// Throws if canvas.toBlob fails or times out — callers must handle the rejection.
+// Falls back to the original only when the image can't be decoded at all (img.onerror).
 function resizeImage(source, maxDim = 1200) {
-  return new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(source), 10000);
-
+  return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(source);
     const img = new Image();
 
+    // Safety timer: if the browser stalls on decode or toBlob, fail loudly
+    // rather than silently sending the original multi-MB file.
+    const timer = setTimeout(() => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Photo took too long to process — please try a different photo'));
+    }, 10000);
+
     img.onload = () => {
+      clearTimeout(timer);
       URL.revokeObjectURL(url);
       const { naturalWidth: w, naturalHeight: h } = img;
       const scale = Math.min(1, maxDim / Math.max(w, h));
@@ -28,14 +34,18 @@ function resizeImage(source, maxDim = 1200) {
       canvas.getContext('2d').drawImage(img, 0, 0, tw, th);
 
       canvas.toBlob((blob) => {
-        clearTimeout(timer);
-        resolve(blob ?? source);
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to process photo — please try a JPEG photo'));
+        }
       }, 'image/jpeg', 0.85);
     };
 
     img.onerror = () => {
       clearTimeout(timer);
       URL.revokeObjectURL(url);
+      // Image couldn't be decoded — pass the original through; size checked below
       resolve(source);
     };
 
@@ -149,10 +159,9 @@ function Creator() {
     try {
       const source = originalFileRef.current;
       const blob = await resizeImage(source, 1600);
-      // If canvas fell back to the original (unsupported format etc.), catch it
-      // here rather than letting a multi-MB upload produce a silent network error.
-      if (blob.size > 5 * 1024 * 1024) {
-        throw new Error('Photo is too large to upload. Please try a JPEG photo.');
+      // Guard against the img.onerror fallback path sending a large undecoded file.
+      if (blob.size > 4 * 1024 * 1024) {
+        throw new Error(`Photo is too large (${(blob.size / 1024 / 1024).toFixed(1)} MB) — please choose a smaller JPEG photo.`);
       }
       setSizeWarning('');
 
