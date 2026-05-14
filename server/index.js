@@ -9,10 +9,10 @@ import { initDb } from './db.js';
 import gamesRouter from './routes/games.js';
 import authRouter from './routes/auth.js';
 
-dotenv.config({ path: path.join(__dirname, '../.env') });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -45,8 +45,8 @@ app.use((err, req, res, next) => {
   if (err?.message === 'Only image files are allowed') {
     return res.status(400).json({ error: err.message });
   }
-  console.error(err);
-  res.status(500).json({ error: 'Server error' });
+  console.error('[server] Unhandled error:', err);
+  res.status(500).json({ error: `Server error: ${err.message}` });
 });
 
 app.listen(PORT, () => {
